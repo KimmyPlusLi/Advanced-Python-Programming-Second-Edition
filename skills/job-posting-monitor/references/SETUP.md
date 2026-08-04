@@ -38,7 +38,18 @@ For each `FAIL`:
    - Workday: `"params": {"host": "x.wd5.myworkdayjobs.com", "tenant": "x",
      "site": "SiteName", "search_terms": ["trader", "portfolio manager",
      "quantitative research"]}`
-   - No API at all → `"adapter": "agent"` and a good `careers_url`.
+   - Eightfold: `"params": {"host": "x.eightfold.ai", "domain": "x.com"}`
+   - Any other JSON endpoint: `"adapter": "json_api"` with url/body
+     templates, `jobs_path`, and a field `map` (full docs in the
+     `fetch_json_api` docstring in `scripts/fetch_jobs.py`).
+   - Server-rendered HTML listing: `"adapter": "html_links"` with
+     `"params": {"pages": [...]}`.
+   - Truly script-hostile site → `"adapter": "agent"` and a good
+     `careers_url`; the agent fetches it each run.
+
+Also treat `EMPTY` results from `--verify` as suspect: an `html_links`
+source returning zero postings usually means the page is JS-rendered — find
+its jobs XHR in browser dev tools and convert the entry to `json_api`.
 3. Re-run `--verify` until every non-agent entry is `OK`, then set
    `"verified": true` on the fixed entries.
 

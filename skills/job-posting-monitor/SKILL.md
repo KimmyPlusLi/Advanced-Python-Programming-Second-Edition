@@ -24,15 +24,20 @@ weekly run) pointing at this skill.
 ## Daily run (cron or "run my job digest")
 
 1. `python3 scripts/fetch_jobs.py`
-2. Read `data/raw_jobs.json` → `agent_required` lists companies whose career
-   sites you must fetch yourself (URL + notes provided). For each, fetch the
-   page (and per-role search pages where the notes suggest), extract open
-   roles relevant to trading/PM/quant research, and append normalized jobs to
+2. Read `data/raw_jobs.json`. Two lists may need your help:
+   - `agent_required`: companies configured for manual agent fetching.
+   - `empty_sources`: scripted adapters that returned zero postings (usually
+     a JS-rendered page defeating the `html_links` fallback).
+   For each, fetch the careers URL yourself, extract open roles relevant to
+   trading/PM/quant research, and append normalized jobs to
    `data/agent_jobs.json` as `{"jobs": [...]}` using the schema documented at
    the top of `scripts/fetch_jobs.py`. Set `id` to a stable value (the
-   posting's canonical URL is fine). Skip a site gracefully if it is down —
-   note it, don't stall the run. Time-box this: prioritize sites, don't
-   exhaustively crawl.
+   posting's canonical URL is fine). While you're there, note the site's
+   underlying jobs XHR if you can spot one and record it in that company's
+   `notes` in `config/companies.json` — converting the entry to `json_api`/
+   `eightfold` makes future runs script-only. Skip a site gracefully if it is
+   down — note it, don't stall the run. Time-box this: prioritize sites,
+   don't exhaustively crawl.
 3. `python3 scripts/match_jobs.py`
 4. `python3 scripts/digest.py --mode daily`
 5. The script prints JSON with `digest_path` and `should_notify`.

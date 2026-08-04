@@ -1,21 +1,23 @@
 {
-  "_comment": "20 monitored firms. adapter: greenhouse | lever | workday | agent. 'agent' = the OpenClaw agent fetches careers_url itself and writes normalized jobs to data/agent_jobs.json. Tokens marked verified:false are best-guess — run scripts/fetch_jobs.py --verify and fix per references/SETUP.md, then set verified:true.",
+  "_comment": "20 monitored firms. Adapters: greenhouse | lever | workday | eightfold | json_api | html_links (see scripts/fetch_jobs.py docstring). Every firm has a scripted adapter — the pipeline is fully standalone. html_links is a server-rendered-HTML fallback; JS-heavy sites will show up as EMPTY in --verify, in which case find the site's underlying JSON endpoint (browser dev tools → XHR) and switch the entry to json_api/eightfold per references/SETUP.md. Tokens marked verified:false are best-guess; --verify and fix, then set true.",
   "companies": [
     {
       "name": "Citadel",
       "category": "hedge_fund",
-      "adapter": "agent",
+      "adapter": "html_links",
       "careers_url": "https://www.citadel.com/careers/open-opportunities/",
+      "params": { "pages": ["https://www.citadel.com/careers/open-opportunities/"] },
       "verified": false,
-      "notes": "Custom site (JS-rendered). Filter to Investing / Trading / Quantitative Research teams."
+      "notes": "If EMPTY (JS-rendered): open dev tools on the careers page, find the jobs XHR, convert to json_api."
     },
     {
       "name": "Millennium",
       "category": "hedge_fund",
-      "adapter": "agent",
+      "adapter": "eightfold",
       "careers_url": "https://mlp.eightfold.ai/careers",
+      "params": { "host": "mlp.eightfold.ai", "domain": "millennium.com" },
       "verified": false,
-      "notes": "Eightfold-hosted. An underlying JSON API may exist (mlp.eightfold.ai/api/apply/v2/jobs) — probe during setup and consider a custom adapter."
+      "notes": "Eightfold-hosted; domain guess millennium.com — check the careers page XHR if EMPTY/FAIL."
     },
     {
       "name": "Point72",
@@ -56,10 +58,13 @@
     {
       "name": "D. E. Shaw",
       "category": "hedge_fund",
-      "adapter": "agent",
+      "adapter": "html_links",
       "careers_url": "https://www.deshaw.com/careers/choose-your-path",
+      "params": { "pages": [
+        "https://www.deshaw.com/careers/choose-your-path"
+      ] },
       "verified": false,
-      "notes": "Custom site. Trader / quant roles under 'Investment professionals'."
+      "notes": "Trader/quant roles live under 'Investment professionals'; add that listing page to params.pages once confirmed."
     },
     {
       "name": "Two Sigma",
@@ -68,23 +73,25 @@
       "params": { "board_token": "twosigma" },
       "careers_url": "https://careers.twosigma.com/",
       "verified": false,
-      "notes": "Greenhouse token guess: twosigma. Falls back to agent fetch if wrong."
+      "notes": "Greenhouse token guess: twosigma."
     },
     {
       "name": "Citadel Securities",
       "category": "prop_shop",
-      "adapter": "agent",
+      "adapter": "html_links",
       "careers_url": "https://www.citadelsecurities.com/careers/open-opportunities/",
+      "params": { "pages": ["https://www.citadelsecurities.com/careers/open-opportunities/"] },
       "verified": false,
-      "notes": "Custom site, same platform as Citadel."
+      "notes": "Same platform as Citadel — same json_api conversion applies if EMPTY."
     },
     {
       "name": "Jane Street",
       "category": "prop_shop",
-      "adapter": "agent",
+      "adapter": "html_links",
       "careers_url": "https://www.janestreet.com/join-jane-street/open-roles/",
+      "params": { "pages": ["https://www.janestreet.com/join-jane-street/open-roles/"] },
       "verified": false,
-      "notes": "Custom site. Check for a JSON payload backing the open-roles page during setup."
+      "notes": "The open-roles page is backed by a JSON payload; if EMPTY, locate it and switch to json_api."
     },
     {
       "name": "Jump Trading",
@@ -107,10 +114,16 @@
     {
       "name": "Optiver",
       "category": "prop_shop",
-      "adapter": "agent",
+      "adapter": "json_api",
       "careers_url": "https://optiver.com/working-at-optiver/career-opportunities/",
+      "params": {
+        "url": "https://optiver.com/wp-json/wp/v2/vacancy?per_page=100&search={term}",
+        "jobs_path": "",
+        "map": { "id": "id", "title": "title.rendered", "url": "link", "location": "acf.location", "description": "excerpt.rendered" },
+        "search_terms": ["trader", "researcher"]
+      },
       "verified": false,
-      "notes": "Custom site with its own jobs API — probe during setup."
+      "notes": "Optiver runs WordPress; the wp-json vacancy endpoint is a guess — verify, else fall back to html_links on the career-opportunities page."
     },
     {
       "name": "IMC Trading",
@@ -124,10 +137,11 @@
     {
       "name": "Susquehanna (SIG)",
       "category": "prop_shop",
-      "adapter": "agent",
+      "adapter": "html_links",
       "careers_url": "https://careers.sig.com/",
+      "params": { "pages": ["https://careers.sig.com/sig-jobs"] },
       "verified": false,
-      "notes": "Avature-hosted custom site."
+      "notes": "Avature-hosted; Avature listing pages are usually server-rendered so html_links has a fair shot. Adjust params.pages to the actual listing URL."
     },
     {
       "name": "DRW",
@@ -141,34 +155,53 @@
     {
       "name": "Goldman Sachs",
       "category": "bank",
-      "adapter": "agent",
+      "adapter": "json_api",
       "careers_url": "https://higher.gs.com/roles",
+      "params": {
+        "url": "https://higher.gs.com/api/rest/jobs?search={term}&limit=50&offset={offset}",
+        "jobs_path": "jobs",
+        "map": { "id": "jobId", "title": "jobTitle", "url": "jobUrl", "location": "location", "description": "description" },
+        "url_prefix": "https://higher.gs.com",
+        "search_terms": ["trader", "portfolio manager", "quantitative"],
+        "page_size": 50,
+        "max_results": 150
+      },
       "verified": false,
-      "notes": "Custom platform. Filter: Global Banking & Markets, trading/strats roles. A JSON API backs higher.gs.com — probe during setup."
+      "notes": "higher.gs.com is API-backed; this endpoint/mapping is a guess — capture the real XHR on first verify and correct url/jobs_path/map."
     },
     {
       "name": "J.P. Morgan",
       "category": "bank",
-      "adapter": "agent",
+      "adapter": "json_api",
       "careers_url": "https://careers.jpmorgan.com/us/en/search-jobs",
+      "params": {
+        "url": "https://careers.jpmorgan.com/services/rest/jobs/search?keyword={term}&limit=50&offset={offset}",
+        "jobs_path": "jobs",
+        "map": { "id": "id", "title": "title", "url": "applyUrl", "location": "location", "description": "description" },
+        "search_terms": ["trader", "portfolio manager", "quantitative research"],
+        "page_size": 50,
+        "max_results": 150
+      },
       "verified": false,
-      "notes": "Oracle Cloud Recruiting. Search 'trader', 'portfolio manager', 'quantitative research' in Markets."
+      "notes": "Oracle Cloud Recruiting behind a JPMC frontend; endpoint is a guess — capture the real search XHR and correct. Fallback: html_links on the search page."
     },
     {
       "name": "Morgan Stanley",
       "category": "bank",
-      "adapter": "agent",
+      "adapter": "eightfold",
       "careers_url": "https://www.morganstanley.com/careers/career-opportunities-search",
+      "params": { "host": "morganstanley.eightfold.ai", "domain": "morganstanley.com" },
       "verified": false,
-      "notes": "Eightfold-backed. Filter to Institutional Securities / Sales & Trading."
+      "notes": "Morgan Stanley careers search is Eightfold-backed; host/domain are guesses — check the XHR host on the search page."
     },
     {
       "name": "UBS",
       "category": "bank",
-      "adapter": "agent",
+      "adapter": "html_links",
       "careers_url": "https://jobs.ubs.com/TGnewUI/Search/Home/Home?partnerid=25008&siteid=5012",
+      "params": { "pages": ["https://jobs.ubs.com/TGnewUI/Search/Home/Home?partnerid=25008&siteid=5012"] },
       "verified": false,
-      "notes": "Infor/Talentlink-hosted. Filter to Investment Bank, Sales & Trading."
+      "notes": "Infor/Talentlink UI is JS-heavy; expect EMPTY until the underlying jobs POST endpoint is captured and moved to json_api."
     }
   ]
 }

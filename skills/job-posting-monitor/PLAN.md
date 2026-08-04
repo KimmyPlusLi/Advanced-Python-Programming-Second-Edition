@@ -23,11 +23,15 @@ Most firms sit on one of a few applicant-tracking systems with public JSON APIs:
 | Workday    | `POST {host}/wday/cxs/{tenant}/{site}/jobs` (JSON body)       | none |
 
 Those are handled by a deterministic Python script (stdlib only, no pip
-dependencies) — cheap, fast, reproducible. Firms with custom career sites
-(Citadel, Jane Street, Goldman, D.E. Shaw, SIG, Optiver, the big banks…) are
-tagged `adapter: "agent"`: during a run the OpenClaw agent fetches/browses those
-pages itself and writes normalized jobs into `data/agent_jobs.json`, which the
-pipeline merges. Principle: **scripts do everything mechanical; the LLM only
+dependencies) — cheap, fast, reproducible. Three more scripted adapters extend
+coverage to custom sites: `eightfold` (Millennium, Morgan Stanley), `json_api`
+(any JSON endpoint, fully described in config — url/body templates plus a
+dot-path field map, so fixing a source is a config edit, not code), and
+`html_links` (server-rendered listing pages). Sites that defeat all of these
+(JS-rendered, e.g. Citadel/Goldman until their XHR endpoints are captured) are
+flagged per-run as `empty_sources`/`agent_required`, and the OpenClaw agent
+fetches those pages itself, writing normalized jobs into
+`data/agent_jobs.json`, which the pipeline merges. Principle: **scripts do everything mechanical; the LLM only
 does what scripts can't** (rendering JS-heavy pages, reading unstructured HTML,
 judgment calls).
 
