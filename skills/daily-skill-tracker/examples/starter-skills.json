@@ -78,15 +78,5 @@
     "name": "Machine learning / deep learning",
     "why": "Build a working foundation in ML/DL",
     "facets": []
-  },
-  {
-    "name": "Work automation",
-    "why": "Automate and streamline daily work",
-    "facets": [
-      "Risk analysis / limit monitoring",
-      "P&L breakdown to tradable instruments",
-      "Pricing XVA and deal contingent",
-      "Innovative ways to manage positions"
-    ]
   }
 ]
