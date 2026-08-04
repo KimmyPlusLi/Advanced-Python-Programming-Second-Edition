@@ -51,6 +51,9 @@ the most neglected skill with a concrete micro-task.
   high; they always outrank normal skills in suggestions.
 - **Soft skills log as observations** — for skills like "street smarts" the
   note is the practice; reviews quote early notes against recent ones.
+- **Authenticity guarantee** — notes and evidence are stored verbatim in
+  the user's own words, byte-for-byte; the AI may suggest improvements in
+  chat but never rewrites, polishes, or blends into the user's record.
 - **Frequency targets** — `--freq` takes `daily`, `2/day`, `3/week`, or
   `2-3/week`; skills still due (today, or this week for weekly targets)
   rank first in suggestions.

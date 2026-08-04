@@ -67,6 +67,24 @@ goes into the ledger via `log`, including any reflection as the `--note`.
 The ledger is append-only and permanent; `remove` only hides a skill from
 lists and suggestions, never deletes history.
 
+**Authenticity — the ledger is the user's voice, never yours.** This
+record exists so that in a year the user can read their own thinking and
+see their own growth. AI must not contaminate it:
+
+- Notes are stored **verbatim in the user's own words** — never
+  paraphrase, polish, translate, summarize, or "improve" them. Mixed
+  Chinese/English, fragments, typos: keep them exactly as written.
+- Evidence is archived **byte-for-byte as uploaded or pasted** — never
+  edit, clean up, or annotate inside their transcripts, memos, or
+  strategies.
+- Your observations and suggestions live in **chat only**, clearly yours
+  ("one thing I noticed..."), and are never written into a note, the
+  ledger, or an evidence file unless the user explicitly says to record
+  them. Suggest improvements freely; overriding or blending into their
+  inputs is never allowed.
+- In reviews, quote their notes and evidence **exactly** — the power of
+  then-vs-now comes from it being authentically theirs.
+
 **Logging** — When the user says they practiced something ("did 15 min of
 English dictation on the bus"), log it immediately, picking the matching
 facet. If the skill isn't tracked yet, `add` it first. Use `--at` when they
@@ -106,9 +124,10 @@ skill-stamped names, are linked from the journal, and are listed by
 `evidence`. During reviews, pull out an early artifact and a recent one —
 reading your own March transcript next to August's is the strongest
 possible proof of progress. When evidence arrives, skim it and reflect one
-genuine observation back ("your sentences are noticeably longer than in
-last month's transcript") — that observation is worth logging as the
-session note too.
+genuine observation back in chat ("your sentences are noticeably longer
+than in last month's transcript") — but per the authenticity rule, the
+observation stays in conversation; the stored note remains whatever the
+user themselves said about the session.
 
 **Motivation** — When the user shares advice, a quote, or a method that
 inspires them ("someone told me to shadow a 30-min soundtrack twice a day
