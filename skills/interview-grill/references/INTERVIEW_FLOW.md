@@ -2,8 +2,8 @@
 
 ## 0. Voice capability check (once per session)
 
-Voice does not depend on the LLM (a text-only model like Codex is fine):
-OpenClaw transcribes inbound Telegram voice notes to text via its configured
+Voice does not depend on the LLM (any text-only model is fine):
+OpenClaw transcribes inbound voice notes to text via its configured
 speech-to-text provider, and outbound voice needs a configured TTS provider.
 At session start in voice mode, determine what this deployment supports:
 
@@ -58,8 +58,10 @@ Announce the format briefly, then start — no lengthy preamble.
    rewrite as an illustration of the principle ("lead with the number"), not
    lines to adopt: the goal is that their OWN next phrasing improves, not
    that they parrot yours. Never present a rewrite as what they said.
-4. **English correction**: the user wants their English fixed. During the
-   interview, never correct language — only note mistakes silently (grammar,
+4. **Language correction** (only if `settings.coach_language` is true —
+   meant for users polishing a non-native language; the examples below are
+   English but the method applies to any language). During the interview,
+   never correct language — only note mistakes silently (grammar,
    word choice, unnatural phrasing, misused finance terms; e.g. "the price
    go up" → "the price goes up", "make a hedge" → "put on a hedge"). In the
    debrief list each mistake as `they said → natural version`, and call out

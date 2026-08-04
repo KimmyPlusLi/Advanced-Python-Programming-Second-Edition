@@ -1,0 +1,15 @@
+{
+  "_comment": "Personal preferences for interview sessions. The SKILL reads these instead of assuming; edit to taste.",
+  "channel": "telegram",
+  "preferred_mode": "voice",
+  "coach_communication": true,
+  "coach_language": true,
+  "defaults": {
+    "length": "quick",
+    "difficulty": "screen"
+  },
+  "topics_source": {
+    "_comment": "Where build_topics.py finds matched JDs. If the path is missing, it falls back to built-in role priors; --jd FILE builds topics from any pasted job description.",
+    "matched_jobs_path": "../job-posting-monitor/data/matched_jobs.json"
+  }
+}

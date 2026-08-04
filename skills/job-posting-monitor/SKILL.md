@@ -1,14 +1,17 @@
 ---
 name: job-posting-monitor
-description: Monitor ~20 hedge fund, prop shop, and bank career sites for portfolio manager, prop trader, quantitative researcher, and sell-side trader roles. Sends daily and weekly digests to Telegram and produces a weekly skill-gap / resume analysis. Use when the user asks about job monitoring, new postings, matched roles, digests, or skill gaps — or when a cron job fires for the daily/weekly run.
-metadata: {"openclaw": {"emoji": "📈"}}
+description: Monitor a configurable list of company career sites (ships with ~20 hedge funds, prop shops, and banks) for roles matching the user's profile (default roles - portfolio manager, prop trader, quantitative researcher, sell-side trader). Sends daily and weekly digests to the user's chat channel and produces a weekly skill-gap / resume analysis. Use when the user asks about job monitoring, new postings, matched roles, digests, or skill gaps - or when a cron job fires for the daily/weekly run.
+metadata: {"openclaw": {"emoji": "📈"}, "version": "1.0.0", "license": "MIT"}
 ---
 
 # Job Posting Monitor
 
 Pipeline: `fetch_jobs.py` (ATS APIs) + agent fetching (custom sites) →
 `match_jobs.py` (scoring vs `config/profile.json`) → `digest.py` (dedup/state,
-markdown digest) → **Telegram message via your normal messaging channel**.
+markdown digest) → message on the channel named in `profile.json` →
+`digest.channel` (falling back to wherever the user normally messages you).
+Everything personal — firms, roles, keywords, locations, delivery — lives in
+`config/`; see Customization below.
 
 All paths below are relative to this skill's directory. Scripts are Python 3
 stdlib-only. Runtime files live in `data/` (never commit them).
@@ -43,22 +46,44 @@ weekly run) pointing at this skill.
 5. The script prints JSON with `digest_path` and `should_notify`.
    - If `should_notify` is false: do nothing (quiet day — the user opted out
      of empty notifications). End the run silently.
-   - Otherwise read the digest file and send it to the user on **Telegram**.
-     The file contains `---8<---` markers — send each chunk as a separate
-     message, in order. Keep the markdown links intact.
+   - Otherwise read the digest file and send it to the user on the configured
+     channel (`digest.channel`). The file contains `---8<---` markers —
+     send each chunk as a separate message, in order (chunks are sized for
+     Telegram's 4,096-char limit, safe on other chat channels too). Keep the markdown links intact.
 
 ## Weekly run (cron, Sunday evening)
 
 Steps 1–3 as above, then:
 
 4. `python3 scripts/digest.py --mode weekly`
-5. Send the weekly digest chunks to Telegram (same chunk rule).
+5. Send the weekly digest chunks on the configured channel (same chunk rule).
 6. **Gap analysis**: follow `references/GAP_ANALYSIS.md`. Read the top
    `digest.gap_analysis_top_n` jobs from `data/matched_jobs.json` (fetch full
    descriptions for any job whose `description` is empty), compare
    requirements against `background` in `config/profile.json`, and send the
-   resulting report to Telegram after the digest. Save a copy to
+   resulting report on the configured channel after the digest. Save a copy to
    `data/digests/gap-analysis-YYYY-MM-DD.md`.
+
+## Customization
+
+Everything is config, no code edits needed. When the user asks to change
+behavior, edit the matching knob and confirm what changed:
+
+- **Firms** — add/remove entries in `config/companies.json`. Any employer
+  works, not just finance: one entry = name, adapter, params (see the
+  adapter docs in `scripts/fetch_jobs.py` and `references/SETUP.md`).
+- **Target roles** — `profile.json` → `target_roles`: any set of roles, each
+  with title regexes and a weight. The defaults (PM / prop trader / quant
+  researcher / sell-side trader) are just a starting point; replace them
+  wholesale for a different field.
+- **Matching strictness** — `min_score` (raise = fewer, better matches),
+  `exclude_title_patterns`, `keyword_bonuses` (align with the user's
+  background), `locations`.
+- **Delivery** — `digest.channel` (any channel the deployment can message),
+  `notify_when_empty`, item caps, `gap_analysis_top_n`; cron times are set
+  in the user's scheduler, not here.
+- **Skill-gap lexicon** — `skill_lexicon` drives the weekly demand table;
+  extend it with domain terms relevant to the user's field.
 
 ## Rules
 

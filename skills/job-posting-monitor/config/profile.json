@@ -87,6 +87,7 @@
   },
   "min_score": 60,
   "digest": {
+    "channel": "telegram",
     "max_daily_items": 25,
     "max_weekly_items": 60,
     "notify_when_empty": false,

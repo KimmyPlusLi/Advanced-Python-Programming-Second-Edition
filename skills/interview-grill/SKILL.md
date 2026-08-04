@@ -1,34 +1,38 @@
 ---
 name: interview-grill
-description: Run realistic mock interviews (text or voice, over Telegram) for portfolio manager, prop trader, quantitative researcher, and sell-side trader roles, drilling the most testable topics extracted from job descriptions matched by the job-posting-monitor skill. Use when the user asks for interview prep, a mock interview, to be grilled/quizzed, or to review interview performance and weak areas.
-metadata: {"openclaw": {"emoji": "🎤"}}
+description: Run realistic mock interviews (text or voice, over chat) drilling the most testable topics from real job descriptions - integrates with the job-posting-monitor skill when installed, or works standalone from any pasted JD or built-in role priors (defaults cover trading/finance roles; fully configurable). Use when the user asks for interview prep, a mock interview, to be grilled/quizzed, or to review interview performance and weak areas.
+metadata: {"openclaw": {"emoji": "🎤"}, "version": "1.0.0", "license": "MIT"}
 ---
 
 # Interview Grill
 
-Companion to `../job-posting-monitor`. That skill finds matched postings;
-this one turns their job descriptions into interview drills and runs them
-like a real interviewer would — one question at a time, live follow-ups,
-honest scoring, and a weakness log that shapes the next session.
+Turns job descriptions into interview drills and runs them like a real
+interviewer would — one question at a time, live follow-ups, honest scoring,
+and a weakness log that shapes the next session. Works best alongside the
+`job-posting-monitor` skill (drills what matched JDs actually demand) but
+runs standalone from any pasted JD or built-in role priors.
+Personal preferences (mode, coaching, channel, paths) live in
+`config/settings.json`; see Customization below.
 
 All paths relative to this skill's directory. Runtime data lives in `data/`
 (never commit). Scripts are Python 3 stdlib-only.
 
 ## Starting a session
 
-1. Build/refresh the topic plan:
-   `python3 scripts/build_topics.py`
-   (reads `../job-posting-monitor/data/matched_jobs.json`; if it's missing or
-   stale >7 days, run that skill's fetch+match first). Output:
-   `data/topics.json` — ranked testable topics per role, with the firms/JDs
-   demanding each.
+1. Build/refresh the topic plan: `python3 scripts/build_topics.py`.
+   Sources, best first: matched JDs from job-posting-monitor (path in
+   `settings.json`; refresh that pipeline if stale >7 days) → a JD the user
+   pastes (save to a temp file, pass `--jd FILE`) → built-in role priors.
+   Output: `data/topics.json` — ranked testable topics per role, with the
+   firms/JDs demanding each.
 2. Check `python3 scripts/progress.py` for weak topics from past sessions.
 3. Ask the user (briefly, one message): which role or specific matched job to
    interview for, session length (quick ~15 min / full ~45 min), difficulty
-   (screen / final round), and **text or voice**. Default: their
-   highest-scored matched role, quick, screen, **voice** — the user
-   specifically wants to polish verbal delivery, so prefer voice (or hybrid)
-   whenever the deployment allows it.
+   (screen / final round), and **text or voice**. Defaults come from
+   `config/settings.json` (`preferred_mode`, `defaults.length`,
+   `defaults.difficulty`) plus their highest-scored matched role. When
+   `preferred_mode` is "voice", prefer voice (or hybrid) whenever the
+   deployment allows it.
 4. Compose the session plan: ~60% top-ranked topics for that role from
    `topics.json`, ~25% weak topics from `progress.py`, ~15% behavioral/story
    questions tied to the target firm. Use `references/QUESTION_BANK.md` for
@@ -53,16 +57,18 @@ Follow `references/INTERVIEW_FLOW.md` strictly. The essentials:
 
 ## Text vs voice
 
-- **Text mode**: Telegram text messages. Mental-math and probability
+- **Text mode**: ordinary chat messages on the configured channel.
+  Mental-math and probability
   questions get a "answer without tools, reply within ~60s" framing —
   remind the user once at the start, then trust them.
-- **Voice mode**: the user answers with Telegram voice notes; transcribe and
+- **Voice mode**: the user answers with voice notes; transcribe and
   treat exactly like text answers. Reply with voice too when your deployment
   can send TTS voice notes — keep spoken questions short and natural, restate
   numbers clearly ("one hundred, strike one-oh-five"). If you cannot send
   voice, say so once and run hybrid (your questions in text, their answers by
   voice) — that still trains verbal delivery, which is the point.
-  In voice mode also score **communication**: real interviews judge the
+  When `settings.coach_communication` is true, also score
+  **communication** in voice mode: real interviews judge the
   delivery, not just the content. Listen for (via the transcript): filler
   words and hedging ("kind of", "I guess", "maybe like"), answer-first
   structure vs rambling toward the point, undefended flip-flopping under
@@ -74,13 +80,15 @@ Follow `references/INTERVIEW_FLOW.md` strictly. The essentials:
 ## Debrief (always, end of session)
 
 1. Per-question review: their answer, ideal answer sketch, score 0–5.
-2. Delivery coaching and **English correction** — the user is polishing both
-   interview communication and their English. Never correct language
-   mid-interview; log mistakes silently and correct them in the debrief
-   (`they said → natural version`), flagging errors that recur across
-   sessions. Details in `references/INTERVIEW_FLOW.md`.
+2. Delivery coaching (if `settings.coach_communication`) and **language
+   correction** (if `settings.coach_language` — for users polishing a
+   non-native language). Never correct language mid-interview; log mistakes
+   silently and correct them in the debrief (`they said → natural version`),
+   flagging errors that recur across sessions. Details in
+   `references/INTERVIEW_FLOW.md`.
 3. Session scorecard: overall, by topic, plus 2–3 concrete drills for the
-   weakest areas. Send to Telegram; in voice mode send the scorecard as text
+   weakest areas. Send on the configured channel; in voice mode send the
+   scorecard as text
    (numbers don't belong in audio).
 4. Save the session per the schema in `references/INTERVIEW_FLOW.md` to
    `data/sessions/<date>-<role>.json` and the scorecard markdown to
@@ -110,10 +118,29 @@ back or iterate:
   `retake_of` set so progress tracks the improvement.
 - "replay Tuesday's interview" → `python3 scripts/sessions.py show <date>`.
 - "export my archive" → `python3 scripts/sessions.py export` (single
-  markdown file; send it to Telegram as a document).
+  markdown file; send it as a document on the configured channel).
 
 For this to work, archiving must be complete: always fill `answer_full` and
 `ideal_answer` when saving a session — a summary can't be iterated on.
+
+## Customization
+
+All knobs live in `config/settings.json` — edit on request and confirm:
+
+- `preferred_mode`: "voice" | "text" | "ask" (session default).
+- `coach_communication` / `coach_language`: toggle delivery coaching and
+  language correction independently (e.g. a native speaker sets
+  `coach_language: false`).
+- `channel`: where sessions and scorecards are delivered.
+- `defaults.length` / `defaults.difficulty`: session shape.
+- `topics_source.matched_jobs_path`: where matched JDs come from (point at
+  any job-posting-monitor install, or ignore and use `--jd`/priors).
+- Question content: extend `TOPICS`/`ROLE_PRIORS` in
+  `scripts/build_topics.py` and add sections to
+  `references/QUESTION_BANK.md` — the only place a new field (e.g.
+  consulting, big-tech) needs real work. Topic names must stay consistent
+  across both files and archived sessions, since progress tracking
+  aggregates on them.
 
 ## Rules
 
