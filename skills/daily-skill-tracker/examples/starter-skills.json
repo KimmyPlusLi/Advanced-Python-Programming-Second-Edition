@@ -24,9 +24,9 @@
     ]
   },
   {
-    "name": "Stakeholder communication",
+    "name": "Communication",
     "priority": "high",
-    "freq": "daily",
+    "freq": "2-3/week",
     "why": "Communicate achievements, problems and solutions with senior management",
     "facets": [
       "Practice a 30-second achievement summary",
@@ -66,8 +66,11 @@
     ]
   },
   {
-    "name": "Machine learning / deep learning",
-    "why": "Build a working foundation in ML/DL",
-    "facets": []
+    "name": "Domain Knowledge",
+    "freq": "1-2/week",
+    "why": "Deepen the technical foundations behind my work",
+    "facets": [
+      "Machine learning / deep learning"
+    ]
   }
 ]
