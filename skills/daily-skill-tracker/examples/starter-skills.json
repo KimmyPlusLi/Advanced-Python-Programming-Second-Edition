@@ -1,0 +1,90 @@
+[
+  {
+    "name": "English",
+    "priority": "high",
+    "why": "Communicate natively and confidently at work and in life",
+    "facets": [
+      "TV shows & news dictation",
+      "Imitation & speaking practice",
+      "Reading books from Freddy",
+      "Writing",
+      "AI-assisted practice"
+    ]
+  },
+  {
+    "name": "Emotional management",
+    "priority": "high",
+    "why": "Stay calm under pressure; be a role model for 聪聪",
+    "facets": [
+      "Notice and name emotions in the moment",
+      "Reflect on one situation handled well or badly",
+      "Practice a calm response to a stressful trigger"
+    ]
+  },
+  {
+    "name": "Street smarts",
+    "priority": "high",
+    "why": "Learn how effective people deal with people and work",
+    "facets": [
+      "Observe how Ben speaks and acts",
+      "Observe how Troy speaks and acts",
+      "Observe how Christian speaks and acts",
+      "Try one observed technique myself"
+    ]
+  },
+  {
+    "name": "Stakeholder communication",
+    "priority": "high",
+    "why": "Communicate achievements, problems and solutions with senior management",
+    "facets": [
+      "Practice a 30-second achievement summary",
+      "Frame a problem with proposed solutions",
+      "Rehearse answering a hard question simply"
+    ]
+  },
+  {
+    "name": "Trading skills",
+    "priority": "high",
+    "why": "Sharpen pricing and trading of interest rate derivatives",
+    "facets": [
+      "SOFR futures and options",
+      "Treasury bond basis",
+      "Volatilities",
+      "XVA challenges",
+      "Commodities"
+    ]
+  },
+  {
+    "name": "Trading strategies & backtesting",
+    "priority": "high",
+    "why": "Build and backtest systematic trading strategies",
+    "facets": [
+      "Strategy ideas & research",
+      "Backtesting implementation",
+      "Reviewing results & iterating"
+    ]
+  },
+  {
+    "name": "Machine learning / deep learning",
+    "why": "Build a working foundation in ML/DL",
+    "facets": []
+  },
+  {
+    "name": "Python",
+    "why": "Level up from crash course to advanced Python programming",
+    "facets": [
+      "Crash course in Python",
+      "Advanced Python programming"
+    ]
+  },
+  {
+    "name": "Work automation",
+    "why": "Automate and streamline daily work",
+    "facets": [
+      "Risk analysis / limit monitoring",
+      "P&L breakdown to tradable instruments",
+      "Pricing XVA and deal contingent",
+      "Innovative ways to manage positions"
+    ]
+  }
+]
