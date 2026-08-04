@@ -34,6 +34,7 @@ python3 {skill_dir}/scripts/tracker.py <command> [args]
 | Today's status | `today` (`--nudge` for reminders: silent if logged; add `--strict` to stay noisy until every per-day target is met) |
 | Streaks and totals | `stats [--days N]` |
 | Period rollup | `summary --period day\|week\|month\|ytd` |
+| Unlocked milestones | `milestones` |
 | Long look-back | `review [--months N]` (default 6) |
 | Visual dashboard | `dashboard [--out PATH]` → self-contained HTML |
 
@@ -81,6 +82,18 @@ what they observed or tried in their own words ("Troy pushed back on the
 desk head without raising his voice — named the risk, offered two options").
 Always ask for or extract a note when logging these; months later the
 review quotes these notes back to show growth.
+
+**Rewards** — `log` prints a `🎉 Milestone unlocked` line when the session
+crosses a goal: first session of a skill, streak marks (3/7/14/30/60/100+
+days), accumulated-hour marks (1/5/10/25/50/100+ h per skill and overall),
+session-count marks, every facet of a skill practiced, and "perfect day"
+(every target cleared). This is the positive feedback loop — make each one
+land. Celebrate warmly and specifically ("7-day streak — a week ago
+English was a chore you squeezed onto the bus; now it's a habit"), connect
+it to their "why", and for bigger marks (25 h+, 30-day streaks, perfect
+weeks) suggest they treat themselves to a small real-world reward. Never
+invent a milestone the script didn't print, and never turn a celebration
+into pressure about the next one.
 
 **Suggesting** — When the user has a spare moment ("I have 10 minutes"),
 run `suggest` and turn the top pick into ONE concrete micro-task sized to

@@ -130,6 +130,87 @@ def streak_for(dates: set, today: date) -> int:
     return n
 
 
+def load_achievements() -> list:
+    f = data_dir() / "achievements.jsonl"
+    if not f.exists():
+        return []
+    return [json.loads(l) for l in f.read_text(encoding="utf-8").splitlines() if l.strip()]
+
+
+def append_achievements(items: list) -> None:
+    if not items:
+        return
+    f = data_dir() / "achievements.jsonl"
+    with f.open("a", encoding="utf-8") as fh:
+        for a in items:
+            fh.write(json.dumps(a, ensure_ascii=False) + "\n")
+
+
+_HOUR_MARKS = [1, 5, 10, 25, 50, 100, 250]
+_SESSION_MARKS = [10, 25, 50, 100, 250, 500]
+_STREAK_MARKS = [3, 7, 14, 30, 60, 100, 180, 365]
+_TOTAL_HOUR_MARKS = [10, 25, 50, 100, 250, 500, 1000]
+
+
+def detect_milestones(before, after, skills, name, today):
+    """Goals newly crossed by the entry that turned `before` into `after`."""
+    ach = []
+    sk_b = [e for e in before if e["skill"] == name]
+    sk_a = [e for e in after if e["skill"] == name]
+
+    if not sk_b:
+        ach.append(("first", f"First ever session of {name} — the journey starts"))
+
+    tb, ta = (sum(e["minutes"] for e in x) for x in (sk_b, sk_a))
+    for h in _HOUR_MARKS:
+        if tb < h * 60 <= ta:
+            ach.append(("hours", f"{name}: {h} hour{'s' if h > 1 else ''} of accumulated practice"))
+    for c in _SESSION_MARKS:
+        if len(sk_b) < c <= len(sk_a):
+            ach.append(("sessions", f"{name}: {c} sessions logged"))
+
+    ob, oa = (sum(e["minutes"] for e in x) for x in (before, after))
+    for h in _TOTAL_HOUR_MARKS:
+        if ob < h * 60 <= oa:
+            ach.append(("hours", f"{h} hours of practice across all skills"))
+
+    s_b = streak_for({entry_date(e) for e in before}, today)
+    s_a = streak_for({entry_date(e) for e in after}, today)
+    for s in _STREAK_MARKS:
+        if s_b < s <= s_a:
+            ach.append(("streak", f"{s}-day practice streak"))
+
+    skill = next((s for s in skills if s["name"] == name), None)
+    facets = (skill or {}).get("facets") or []
+    if len(facets) >= 2:
+        used_b = {e.get("facet") for e in sk_b if e.get("facet")}
+        used_a = {e.get("facet") for e in sk_a if e.get("facet")}
+        if not set(facets) <= used_b and set(facets) <= used_a:
+            ach.append(("facets", f"{name}: every facet practiced at least once"))
+
+    def total_due(entries):
+        return sum(due for *_, due, _ in rank_suggestions(skills, entries, today))
+
+    if total_due(before) > 0 and total_due(after) == 0:
+        ach.append(("clear", "Every target met — a perfect day"))
+
+    # Dedupe against history: one-off marks never repeat; streaks and
+    # perfect days may repeat, but at most once per day.
+    repeatable = {"streak", "clear"}
+    history = load_achievements()
+    past_texts = {a["text"] for a in history if a.get("kind") not in repeatable}
+    past_daily = {(a["text"], a["date"]) for a in history if a.get("kind") in repeatable}
+    fresh = []
+    for kind, text in ach:
+        if kind in repeatable:
+            if (text, today.isoformat()) in past_daily:
+                continue
+        elif text in past_texts:
+            continue
+        fresh.append({"date": today.isoformat(), "kind": kind, "text": text})
+    return fresh
+
+
 def per_skill(entries: list) -> dict:
     by = defaultdict(list)
     for e in entries:
@@ -236,10 +317,12 @@ def cmd_log(args):
         entry["facet"] = args.facet
     if args.note:
         entry["note"] = args.note
+    before = load_log()
     append_log(entry)
     render_journal()
+    after = load_log()
 
-    entries = [e for e in load_log() if e["skill"] == name]
+    entries = [e for e in after if e["skill"] == name]
     total = sum(e["minutes"] for e in entries)
     dates = {entry_date(e) for e in entries}
     streak = streak_for(dates, date.today())
@@ -248,6 +331,11 @@ def cmd_log(args):
         bits.append(f"{streak}-day streak")
     bits.append(f"{fmt_minutes(total)} total over {len(entries)} session(s)")
     print(" — ".join(bits))
+
+    milestones = detect_milestones(before, after, skills, name, date.today())
+    append_achievements(milestones)
+    for m in milestones:
+        print(f"🎉 Milestone unlocked: {m['text']}!")
 
 
 def rank_suggestions(skills, entries, today):
@@ -425,6 +513,12 @@ def cmd_review(args):
         )
         print(f"  {mo}: {fmt_minutes(sum(sk.values()))} ({parts})")
 
+    trophies = [a for a in load_achievements() if a["date"][:7] in months]
+    if trophies:
+        print("\nMilestones unlocked:")
+        for a in trophies:
+            print(f"  🏆 {a['date']} — {a['text']}")
+
     print("\nPer skill — then vs. now:")
     by = per_skill(span)
     for name in sorted(by, key=lambda n: -sum(e["minutes"] for e in by[n])):
@@ -480,6 +574,15 @@ def cmd_edit(args):
         render_journal()
     save_skills(skills)
     print(f"Updated skill: {s['name']}")
+
+
+def cmd_milestones(args):
+    ach = load_achievements()
+    if not ach:
+        print("No milestones yet — they unlock as you log practice.")
+        return
+    for a in ach:
+        print(f"🏆 {a['date']} — {a['text']}")
 
 
 def cmd_remove(args):
@@ -790,6 +893,12 @@ def cmd_dashboard(args):
             f'<td class="num">{len({entry_date(e) for e in sk})}</td>'
             f"<td>{'today' if gap_d == 0 else _esc(f'{gap_d}d ago')}</td></tr>"
         )
+    trophies = load_achievements()[-8:]
+    trophy_html = "".join(
+        f'<li><span class="nd">{_esc(a["date"])}</span> 🏆 {_esc(a["text"])}</li>'
+        for a in reversed(trophies)
+    ) or '<li class="nf">Milestones unlock as you practice.</li>'
+
     recent = [e for e in entries if e.get("note")][-8:]
     notes_html = "".join(
         f'<li><span class="nd">{_esc(e["ts"][:10])}</span> '
@@ -885,6 +994,7 @@ td {{ border-bottom: 1px solid var(--grid); padding: 7px 10px 7px 0; }}
 <table><thead><tr><th>Skill</th><th class="num">Time</th>
 <th class="num">Sessions</th><th class="num">Days</th><th>Last</th></tr></thead>
 <tbody>{"".join(trows)}</tbody></table></div>
+<div class="card"><h2>Milestones</h2><ul class="notes">{trophy_html}</ul></div>
 <div class="card"><h2>Recent reflections</h2><ul class="notes">{notes_html}</ul></div>
 <div id="tip"></div>
 </div>
@@ -1006,6 +1116,9 @@ def main(argv=None):
     sp = sub.add_parser("review", help="long look-back over months")
     sp.add_argument("--months", type=int, default=6)
     sp.set_defaults(func=cmd_review)
+
+    sp = sub.add_parser("milestones", help="list unlocked milestones")
+    sp.set_defaults(func=cmd_milestones)
 
     sp = sub.add_parser("summary", help="ledger rollup for a period")
     sp.add_argument("--period", choices=["day", "week", "month", "ytd"],
