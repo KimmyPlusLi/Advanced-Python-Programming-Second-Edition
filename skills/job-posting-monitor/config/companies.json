@@ -1,0 +1,174 @@
+{
+  "_comment": "20 monitored firms. adapter: greenhouse | lever | workday | agent. 'agent' = the OpenClaw agent fetches careers_url itself and writes normalized jobs to data/agent_jobs.json. Tokens marked verified:false are best-guess — run scripts/fetch_jobs.py --verify and fix per references/SETUP.md, then set verified:true.",
+  "companies": [
+    {
+      "name": "Citadel",
+      "category": "hedge_fund",
+      "adapter": "agent",
+      "careers_url": "https://www.citadel.com/careers/open-opportunities/",
+      "verified": false,
+      "notes": "Custom site (JS-rendered). Filter to Investing / Trading / Quantitative Research teams."
+    },
+    {
+      "name": "Millennium",
+      "category": "hedge_fund",
+      "adapter": "agent",
+      "careers_url": "https://mlp.eightfold.ai/careers",
+      "verified": false,
+      "notes": "Eightfold-hosted. An underlying JSON API may exist (mlp.eightfold.ai/api/apply/v2/jobs) — probe during setup and consider a custom adapter."
+    },
+    {
+      "name": "Point72",
+      "category": "hedge_fund",
+      "adapter": "greenhouse",
+      "params": { "board_token": "point72" },
+      "careers_url": "https://careers.point72.com/",
+      "verified": false,
+      "notes": "Greenhouse board token guess: point72."
+    },
+    {
+      "name": "Balyasny Asset Management",
+      "category": "hedge_fund",
+      "adapter": "greenhouse",
+      "params": { "board_token": "balyasnyassetmanagementlp" },
+      "careers_url": "https://bam.com/careers",
+      "verified": false,
+      "notes": "Greenhouse token guess: balyasnyassetmanagementlp."
+    },
+    {
+      "name": "ExodusPoint Capital",
+      "category": "hedge_fund",
+      "adapter": "greenhouse",
+      "params": { "board_token": "exoduspoint" },
+      "careers_url": "https://www.exoduspoint.com/careers",
+      "verified": false,
+      "notes": "Greenhouse token guess: exoduspoint (try exoduspointcapitalmanagement if 404)."
+    },
+    {
+      "name": "Squarepoint Capital",
+      "category": "hedge_fund",
+      "adapter": "greenhouse",
+      "params": { "board_token": "squarepointcapital" },
+      "careers_url": "https://www.squarepoint-capital.com/careers",
+      "verified": false,
+      "notes": "Greenhouse token guess: squarepointcapital."
+    },
+    {
+      "name": "D. E. Shaw",
+      "category": "hedge_fund",
+      "adapter": "agent",
+      "careers_url": "https://www.deshaw.com/careers/choose-your-path",
+      "verified": false,
+      "notes": "Custom site. Trader / quant roles under 'Investment professionals'."
+    },
+    {
+      "name": "Two Sigma",
+      "category": "hedge_fund",
+      "adapter": "greenhouse",
+      "params": { "board_token": "twosigma" },
+      "careers_url": "https://careers.twosigma.com/",
+      "verified": false,
+      "notes": "Greenhouse token guess: twosigma. Falls back to agent fetch if wrong."
+    },
+    {
+      "name": "Citadel Securities",
+      "category": "prop_shop",
+      "adapter": "agent",
+      "careers_url": "https://www.citadelsecurities.com/careers/open-opportunities/",
+      "verified": false,
+      "notes": "Custom site, same platform as Citadel."
+    },
+    {
+      "name": "Jane Street",
+      "category": "prop_shop",
+      "adapter": "agent",
+      "careers_url": "https://www.janestreet.com/join-jane-street/open-roles/",
+      "verified": false,
+      "notes": "Custom site. Check for a JSON payload backing the open-roles page during setup."
+    },
+    {
+      "name": "Jump Trading",
+      "category": "prop_shop",
+      "adapter": "greenhouse",
+      "params": { "board_token": "jumptrading" },
+      "careers_url": "https://www.jumptrading.com/careers/",
+      "verified": false,
+      "notes": "Greenhouse token guess: jumptrading."
+    },
+    {
+      "name": "Hudson River Trading",
+      "category": "prop_shop",
+      "adapter": "greenhouse",
+      "params": { "board_token": "wehrtyou" },
+      "careers_url": "https://www.hudsonrivertrading.com/careers/",
+      "verified": false,
+      "notes": "Greenhouse token guess: wehrtyou (HRT's known board name)."
+    },
+    {
+      "name": "Optiver",
+      "category": "prop_shop",
+      "adapter": "agent",
+      "careers_url": "https://optiver.com/working-at-optiver/career-opportunities/",
+      "verified": false,
+      "notes": "Custom site with its own jobs API — probe during setup."
+    },
+    {
+      "name": "IMC Trading",
+      "category": "prop_shop",
+      "adapter": "greenhouse",
+      "params": { "board_token": "imc" },
+      "careers_url": "https://careers.imc.com/",
+      "verified": false,
+      "notes": "Greenhouse token guess: imc."
+    },
+    {
+      "name": "Susquehanna (SIG)",
+      "category": "prop_shop",
+      "adapter": "agent",
+      "careers_url": "https://careers.sig.com/",
+      "verified": false,
+      "notes": "Avature-hosted custom site."
+    },
+    {
+      "name": "DRW",
+      "category": "prop_shop",
+      "adapter": "greenhouse",
+      "params": { "board_token": "drweng" },
+      "careers_url": "https://drw.com/work-at-drw/",
+      "verified": false,
+      "notes": "Greenhouse token guess: drweng (try drw if 404)."
+    },
+    {
+      "name": "Goldman Sachs",
+      "category": "bank",
+      "adapter": "agent",
+      "careers_url": "https://higher.gs.com/roles",
+      "verified": false,
+      "notes": "Custom platform. Filter: Global Banking & Markets, trading/strats roles. A JSON API backs higher.gs.com — probe during setup."
+    },
+    {
+      "name": "J.P. Morgan",
+      "category": "bank",
+      "adapter": "agent",
+      "careers_url": "https://careers.jpmorgan.com/us/en/search-jobs",
+      "verified": false,
+      "notes": "Oracle Cloud Recruiting. Search 'trader', 'portfolio manager', 'quantitative research' in Markets."
+    },
+    {
+      "name": "Morgan Stanley",
+      "category": "bank",
+      "adapter": "agent",
+      "careers_url": "https://www.morganstanley.com/careers/career-opportunities-search",
+      "verified": false,
+      "notes": "Eightfold-backed. Filter to Institutional Securities / Sales & Trading."
+    },
+    {
+      "name": "UBS",
+      "category": "bank",
+      "adapter": "agent",
+      "careers_url": "https://jobs.ubs.com/TGnewUI/Search/Home/Home?partnerid=25008&siteid=5012",
+      "verified": false,
+      "notes": "Infor/Talentlink-hosted. Filter to Investment Bank, Sales & Trading."
+    }
+  ]
+}

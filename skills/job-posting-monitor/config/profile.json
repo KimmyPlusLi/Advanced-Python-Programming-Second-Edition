@@ -1,0 +1,107 @@
+{
+  "_comment": "My background and matching rules. TODO markers are filled in during first-run setup (the agent interviews me). All regexes are case-insensitive.",
+  "background": {
+    "summary": "TODO: 2-3 sentence career summary (e.g. '8 years sell-side rates trading at a bulge bracket, then 3 years systematic macro PM at a multi-strat; strong Python, options pricing, and risk management').",
+    "asset_classes": ["TODO e.g. equities", "rates", "fx", "futures", "options"],
+    "current_skills": ["TODO e.g. Python", "options pricing", "risk management", "portfolio construction"],
+    "credentials": ["TODO e.g. CFA, Series 7/57/63, MSc Financial Engineering"],
+    "years_experience": 0,
+    "track_record": "TODO: sharpe / pnl / AUM highlights if shareable"
+  },
+  "target_roles": [
+    {
+      "key": "portfolio_manager",
+      "label": "Portfolio Manager",
+      "weight": 100,
+      "title_patterns": [
+        "portfolio\\s*manager",
+        "\\bsub[- ]?pm\\b",
+        "portfolio\\s*management",
+        "\\bpm\\b.*(macro|equit|credit|rates|systematic|quant|commodit|fx)"
+      ]
+    },
+    {
+      "key": "prop_trader",
+      "label": "Prop / Buy-side Trader",
+      "weight": 90,
+      "title_patterns": [
+        "\\btrader\\b",
+        "\\btrading\\b.*(analyst|associate|professional)",
+        "market\\s*mak(er|ing)"
+      ]
+    },
+    {
+      "key": "quant_researcher",
+      "label": "Quantitative Researcher",
+      "weight": 90,
+      "title_patterns": [
+        "quant(itative)?\\s*research(er)?",
+        "quant(itative)?\\s*(analyst|strategist|trader)",
+        "alpha\\s*research(er)?",
+        "research\\s*scientist.*(trading|markets|finance)"
+      ]
+    },
+    {
+      "key": "sell_side_trader",
+      "label": "Sell-side Trader",
+      "weight": 80,
+      "title_patterns": [
+        "sales[- ]?trader",
+        "flow\\s*trader",
+        "execution\\s*trader",
+        "delta\\s*one",
+        "e-?trading",
+        "(rates|credit|fx|equit(y|ies)|commodit(y|ies))\\s*(trader|trading)"
+      ]
+    }
+  ],
+  "exclude_title_patterns": [
+    "\\bintern(ship)?\\b",
+    "\\bcampus\\b",
+    "\\bgraduate\\b",
+    "\\buniversity\\b",
+    "\\bsummer\\b",
+    "software\\s*(engineer|developer)",
+    "\\bdeveloper\\b",
+    "\\bdevops\\b",
+    "\\brecruit(er|ing)\\b",
+    "\\bcompliance\\b",
+    "\\blegal\\b",
+    "\\bhr\\b|human\\s*resources",
+    "\\baccountant\\b|\\baccounting\\b",
+    "\\breceptionist\\b|administrative"
+  ],
+  "keyword_bonuses": {
+    "_comment": "Description keywords worth extra points; align with my background during setup.",
+    "systematic": 6, "discretionary": 4, "macro": 6, "equities": 5,
+    "options": 6, "futures": 5, "volatility": 5, "market making": 5,
+    "fixed income": 4, "rates": 4, "credit": 3, "fx": 4, "commodities": 3,
+    "python": 4, "portfolio construction": 5, "risk management": 4,
+    "alpha": 4, "execution": 3, "derivatives": 4
+  },
+  "locations": {
+    "include_patterns": ["new york", "\\bnyc\\b", "greenwich", "stamford", "chicago", "london", "remote"],
+    "exclude_patterns": [],
+    "unknown_location_ok": true,
+    "location_bonus": 5
+  },
+  "min_score": 60,
+  "digest": {
+    "max_daily_items": 25,
+    "max_weekly_items": 60,
+    "notify_when_empty": false,
+    "gap_analysis_top_n": 12
+  },
+  "skill_lexicon": [
+    "python", "c++", "rust", "java", "kdb", "q/kdb+", "sql", "machine learning",
+    "deep learning", "statistics", "time series", "backtesting", "alpha research",
+    "portfolio construction", "portfolio optimization", "risk management",
+    "options pricing", "derivatives", "volatility", "market making",
+    "execution algorithms", "algorithmic trading", "high frequency",
+    "systematic trading", "discretionary trading", "macro", "equities",
+    "fixed income", "rates", "credit", "fx", "commodities", "futures", "etf",
+    "delta one", "electronic trading", "order flow", "microstructure",
+    "sharpe", "track record", "pnl", "aum", "cfa", "frm",
+    "series 7", "series 57", "series 63", "series 3", "phd", "stakeholder"
+  ]
+}
