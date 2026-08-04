@@ -1,5 +1,15 @@
 [
   {
+    "name": "Exercise",
+    "priority": "high",
+    "why": "Stay healthy and energetic for everything else",
+    "facets": [
+      "Cardio",
+      "Strength",
+      "Stretching / mobility"
+    ]
+  },
+  {
     "name": "English",
     "priority": "high",
     "why": "Communicate natively and confidently at work and in life",

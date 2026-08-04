@@ -24,14 +24,18 @@ python3 {skill_dir}/scripts/tracker.py <command> [args]
 
 | Intent | Command |
 |---|---|
-| Track a new skill | `add "<skill>" [--why "..."] [--facet "..."]... [--high]` |
+| Track a new skill | `add "<skill>" [--why "..."] [--facet "..."]... [--high] [--freq N]` |
 | Bulk-add skills | `import <file.json>` (see `examples/starter-skills.json`) |
-| List skills | `skills` |
+| List skills | `skills [--all]` |
+| Change a skill | `edit "<skill>" [--why] [--priority high\|normal] [--freq N] [--add-facet] [--remove-facet] [--rename] [--restore]` |
+| Remove a skill | `remove "<skill>"` (archives; `--purge` to drop from the list — history always kept) |
 | Log a session | `log "<skill>" <minutes> [--note "..."] [--facet "..."] [--at DATE]` |
 | What to practice now | `suggest` |
-| Today's summary | `today` (add `--nudge` for reminder use: silent if already logged) |
+| Today's status | `today` (`--nudge` for reminders: silent if logged; add `--strict` to stay noisy until every per-day target is met) |
 | Streaks and totals | `stats [--days N]` |
+| Period rollup | `summary --period day\|week\|month\|ytd` |
 | Long look-back | `review [--months N]` (default 6) |
+| Visual dashboard | `dashboard [--out PATH]` → self-contained HTML |
 
 Skill names match case-insensitively by exact name, unique prefix, or unique
 substring — "log eng 10" works once "English" exists. A skill can have
@@ -40,7 +44,10 @@ facet so practice modes don't collapse into one favorite. **High-priority**
 skills (`--high` / `"priority": "high"`) always outrank normal ones in
 suggestions — the user reserves this tier for slow-to-acquire skills:
 English, soft skills (emotional management, street smarts, stakeholder
-communication), and trading skills.
+communication), trading skills, and exercise. **Frequency** (`--freq`) is
+the target sessions per day (1 = everyday, 2 = twice a day, 3 = 3x/day);
+skills still due today rank first in `suggest`, and `today` lists what's
+still due.
 
 ## How to behave
 
@@ -48,11 +55,23 @@ communication), and trading skills.
 `{skill_dir}/examples/starter-skills.json`, then tailor: ask which skills to
 keep, drop, or re-word.
 
+**The ledger** — Every message about what the user did and for how long
+goes into the ledger via `log`, including any reflection as the `--note`.
+The ledger is append-only and permanent; `remove` only hides a skill from
+lists and suggestions, never deletes history.
+
 **Logging** — When the user says they practiced something ("did 15 min of
 English dictation on the bus"), log it immediately, picking the matching
 facet. If the skill isn't tracked yet, `add` it first. Use `--at` when they
 mention it happened earlier ("yesterday I…"). Keep friction near zero: reply
 with the script's one-line confirmation, lightly warmed up. Never lecture.
+
+**Managing the list** — The user curates skills conversationally: "add
+exercise, high priority, twice a day" → `add "Exercise" --high --freq 2`;
+"drop machine learning for now" → `remove`; "make 日语 high priority" or
+"add a listening facet to English" → `edit`. Confirm in one line what
+changed. Prefer `remove` (archive) over `--purge` unless they explicitly
+want the skill gone from the list.
 
 **Soft skills log as observations.** For emotional management, street
 smarts, and stakeholder communication, the note IS the practice: capture
@@ -71,6 +90,13 @@ only if they decline.
 **Daily check-in** — For "how's today going", run `today`. If nothing is
 logged, point at the suggestion; a 5-minute session counts. Small and daily
 beats big and rare.
+
+**Summaries** — For "how was my day/week/month/year", run
+`summary --period day|week|month|ytd` and relay it conversationally. When
+the user wants to *see* their progress ("show me my dashboard", "visualize
+my year"), run `dashboard` and send them the generated HTML file — it is
+fully self-contained (stat tiles, daily heatmap, weekly and monthly charts,
+year-to-date totals, recent reflections) and works offline in any browser.
 
 **Reviews** — For "how am I doing" over weeks or months, run `review`. Turn
 the numbers into a narrative that connects the dots: total hours per skill,

@@ -28,11 +28,14 @@ your history:
 
 ```bash
 python3 scripts/tracker.py import examples/starter-skills.json   # or add your own
-python3 scripts/tracker.py add "日语" --why "..." --high
+python3 scripts/tracker.py add "日语" --why "..." --high --freq 2   # twice a day
 python3 scripts/tracker.py log "English" 10 --facet "Writing" --note "wrote a standup update from scratch"
 python3 scripts/tracker.py suggest        # what to practice in a spare moment
+python3 scripts/tracker.py summary --period week   # day|week|month|ytd rollup
 python3 scripts/tracker.py stats          # streaks and totals
 python3 scripts/tracker.py review         # the 6-month look-back
+python3 scripts/tracker.py dashboard      # visual HTML dashboard
+python3 scripts/tracker.py remove "ML"    # archive (history kept); edit --restore undoes
 ```
 
 In OpenClaw you never type these — just say "did 10 min of English writing on
@@ -48,6 +51,15 @@ the most neglected skill with a concrete micro-task.
   high; they always outrank normal skills in suggestions.
 - **Soft skills log as observations** — for skills like "street smarts" the
   note is the practice; reviews quote early notes against recent ones.
+- **Frequency targets** — `--freq N` sets sessions per day (everyday, twice
+  a day, 3x/day); skills still due today rank first in suggestions.
 - **Silent-unless-needed reminders** — `today --nudge` prints nothing once
-  you've practiced, so a daily cron only pings you when it should.
+  you've practiced, so a daily cron only pings you when it should
+  (`--strict` keeps nudging until every per-day target is met).
+- **Append-only ledger** — removing a skill archives it; logged history is
+  never deleted, so the multi-year record stays intact.
+- **Visual dashboard** — `dashboard` renders a self-contained HTML page:
+  stat tiles, GitHub-style daily heatmap, weekly bars, monthly stacked by
+  skill, year-to-date totals, a table view, and your recent reflections.
+  Light and dark mode, hover tooltips, no external dependencies.
 - Stdlib-only Python 3; no dependencies.
