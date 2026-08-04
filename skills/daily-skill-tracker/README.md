@@ -59,6 +59,10 @@ the most neglected skill with a concrete micro-task.
   (`--strict` keeps nudging until every per-day target is met).
 - **Append-only ledger** — removing a skill archives it; logged history is
   never deleted, so the multi-year record stays intact.
+- **Evidence archive** — attach transcripts, memos, market color, or
+  tested strategies to any session (`--evidence` / `attach`); copies are
+  stored under `evidence/YYYY-MM/`, linked from the journal, and browsable
+  with `evidence`.
 - **Visual dashboard** — `dashboard` renders a self-contained HTML page:
   stat tiles, GitHub-style daily heatmap, weekly bars, monthly stacked by
   skill, year-to-date totals, a table view, and your recent reflections.

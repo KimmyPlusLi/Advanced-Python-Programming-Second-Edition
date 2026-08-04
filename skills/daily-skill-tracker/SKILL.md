@@ -35,6 +35,8 @@ python3 {skill_dir}/scripts/tracker.py <command> [args]
 | Streaks and totals | `stats [--days N]` |
 | Period rollup | `summary --period day\|week\|month\|ytd` |
 | Unlocked milestones | `milestones` |
+| Archive evidence | `log ... --evidence FILE`, or `attach "<skill>" [--file F]... [--text "..."] [--title hint] [--date YYYY-MM-DD]` |
+| Browse evidence | `evidence [skill]` |
 | Long look-back | `review [--months N]` (default 6) |
 | Visual dashboard | `dashboard [--out PATH]` → self-contained HTML |
 
@@ -82,6 +84,29 @@ what they observed or tried in their own words ("Troy pushed back on the
 desk head without raising his voice — named the risk, offered two options").
 Always ask for or extract a note when logging these; months later the
 review quotes these notes back to show growth.
+
+**Evidence** — The user will share artifacts of their practice: a
+transcript of an English conversation with an AI voice assistant, market
+color or a memo they wrote, a strategy idea or backtest they ran. Archive
+these with the session they belong to, never lose them:
+
+- A file they upload → `attach "<skill>" --file <path>` (or
+  `log ... --evidence <path>` when logging at the same time).
+- Content pasted into chat (a transcript, a memo) → write it to a temp
+  file or pass it via `attach "<skill>" --text "..." --title
+  "gpt-voice-transcript"`; give the title a meaningful hint.
+- If the practice session isn't logged yet, log it first (evidence
+  attaches to the most recent session of that skill; use `--date` for an
+  older one).
+
+Copies live under `evidence/YYYY-MM/` in the data dir with date- and
+skill-stamped names, are linked from the journal, and are listed by
+`evidence`. During reviews, pull out an early artifact and a recent one —
+reading your own March transcript next to August's is the strongest
+possible proof of progress. When evidence arrives, skim it and reflect one
+genuine observation back ("your sentences are noticeably longer than in
+last month's transcript") — that observation is worth logging as the
+session note too.
 
 **Rewards** — `log` prints a `🎉 Milestone unlocked` line when the session
 crosses a goal: first session of a skill, streak marks (3/7/14/30/60/100+

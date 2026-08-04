@@ -130,6 +130,46 @@ def streak_for(dates: set, today: date) -> int:
     return n
 
 
+def rewrite_log(entries: list) -> None:
+    f = data_dir() / "log.jsonl"
+    with f.open("w", encoding="utf-8") as fh:
+        for e in sorted(entries, key=lambda e: e["ts"]):
+            fh.write(json.dumps(e, ensure_ascii=False) + "\n")
+
+
+def _slug(name: str) -> str:
+    return "".join(c if c.isalnum() else "-" for c in name.lower()).strip("-")[:40]
+
+
+def store_evidence(skill: str, day: str, files=(), text=None, title=None):
+    """Copy files / write pasted text into evidence/YYYY-MM/; return rel paths."""
+    import shutil
+    month_dir = data_dir() / "evidence" / day[:7]
+    month_dir.mkdir(parents=True, exist_ok=True)
+    stored = []
+    for src in files:
+        src = Path(src).expanduser()
+        if not src.is_file():
+            raise SystemExit(f"Evidence file not found: {src}")
+        dest = month_dir / f"{day}_{_slug(skill)}_{src.name}"
+        n = 1
+        while dest.exists():
+            dest = month_dir / f"{day}_{_slug(skill)}_{n}_{src.name}"
+            n += 1
+        shutil.copy2(src, dest)
+        stored.append(str(dest.relative_to(data_dir())))
+    if text:
+        base = _slug(title or "memo") or "memo"
+        dest = month_dir / f"{day}_{_slug(skill)}_{base}.md"
+        n = 1
+        while dest.exists():
+            dest = month_dir / f"{day}_{_slug(skill)}_{base}-{n}.md"
+            n += 1
+        dest.write_text(text.rstrip() + "\n", encoding="utf-8")
+        stored.append(str(dest.relative_to(data_dir())))
+    return stored
+
+
 def load_achievements() -> list:
     f = data_dir() / "achievements.jsonl"
     if not f.exists():
@@ -317,6 +357,10 @@ def cmd_log(args):
         entry["facet"] = args.facet
     if args.note:
         entry["note"] = args.note
+    if args.evidence:
+        entry["evidence"] = store_evidence(
+            name, when.date().isoformat(), files=args.evidence
+        )
     before = load_log()
     append_log(entry)
     render_journal()
@@ -574,6 +618,55 @@ def cmd_edit(args):
         render_journal()
     save_skills(skills)
     print(f"Updated skill: {s['name']}")
+
+
+def cmd_attach(args):
+    if not args.file and not args.text:
+        raise SystemExit("Nothing to attach — pass --file and/or --text.")
+    skills = load_skills()
+    name = resolve_skill(args.skill, skills)
+    if name is None:
+        raise SystemExit(f"Unknown skill '{args.skill}'.")
+    entries = load_log()
+    matches = [e for e in entries if e["skill"] == name]
+    if args.date:
+        matches = [e for e in matches if e["ts"][:10] == args.date]
+    if not matches:
+        raise SystemExit(
+            f"No logged session of {name}"
+            + (f" on {args.date}" if args.date else "")
+            + " to attach to — log the session first."
+        )
+    target = matches[-1]
+    stored = store_evidence(
+        name, target["ts"][:10],
+        files=args.file or (), text=args.text, title=args.title,
+    )
+    target.setdefault("evidence", []).extend(stored)
+    rewrite_log(entries)
+    render_journal()
+    print(
+        f"Attached to {name} session on {target['ts'][:10]}:\n"
+        + "\n".join(f"  📎 {p}" for p in stored)
+    )
+
+
+def cmd_evidence(args):
+    entries = [e for e in load_log() if e.get("evidence")]
+    if args.skill:
+        name = resolve_skill(args.skill, load_skills())
+        if name is None:
+            raise SystemExit(f"Unknown skill '{args.skill}'.")
+        entries = [e for e in entries if e["skill"] == name]
+    if not entries:
+        print("No evidence attached yet. Use: log ... --evidence FILE, or attach.")
+        return
+    print(f"Evidence lives under {data_dir() / 'evidence'}/")
+    for e in entries:
+        note = f" — {e['note']}" if e.get("note") else ""
+        print(f"{e['ts'][:10]} {e['skill']}{note}")
+        for p in e["evidence"]:
+            print(f"  📎 {p}")
 
 
 def cmd_milestones(args):
@@ -1044,6 +1137,8 @@ def render_journal() -> None:
                 f"- **{e['ts'][:10]}** {e['skill']}{facet}: "
                 f"{fmt_minutes(e['minutes'])}{note}"
             )
+            for p in e.get("evidence", []):
+                lines.append(f"  - 📎 [{Path(p).name}]({p})")
     (data_dir() / "journal.md").write_text("\n".join(lines) + "\n", encoding="utf-8")
 
 
@@ -1091,7 +1186,21 @@ def main(argv=None):
     sp.add_argument("--note", help="what you did / noticed")
     sp.add_argument("--facet", help="which sub-activity")
     sp.add_argument("--at", help="backdate, ISO datetime or YYYY-MM-DD")
+    sp.add_argument("--evidence", action="append",
+                    help="file to archive with this session (repeatable)")
     sp.set_defaults(func=cmd_log)
+
+    sp = sub.add_parser("attach", help="attach evidence to a logged session")
+    sp.add_argument("skill")
+    sp.add_argument("--file", action="append", help="file to archive (repeatable)")
+    sp.add_argument("--text", help="pasted content to save as a markdown memo")
+    sp.add_argument("--title", help="filename hint for --text (e.g. 'gpt-voice-transcript')")
+    sp.add_argument("--date", help="YYYY-MM-DD of the session (default: most recent)")
+    sp.set_defaults(func=cmd_attach)
+
+    sp = sub.add_parser("evidence", help="list archived evidence")
+    sp.add_argument("skill", nargs="?", help="filter by skill")
+    sp.set_defaults(func=cmd_evidence)
 
     sp = sub.add_parser("suggest", help="what to practice now")
     sp.set_defaults(func=cmd_suggest)
