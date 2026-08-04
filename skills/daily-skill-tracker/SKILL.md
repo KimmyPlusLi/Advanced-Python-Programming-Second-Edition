@@ -37,6 +37,8 @@ python3 {skill_dir}/scripts/tracker.py <command> [args]
 | Unlocked milestones | `milestones` |
 | Archive evidence | `log ... --evidence FILE`, or `attach "<skill>" [--file F]... [--text "..."] [--title hint] [--date YYYY-MM-DD]` |
 | Browse evidence | `evidence [skill]` |
+| Save motivation | `edit "<skill>" --add-motivation "..."` |
+| Recall motivation | `motivate [skill]` |
 | Long look-back | `review [--months N]` (default 6) |
 | Visual dashboard | `dashboard [--out PATH]` → self-contained HTML |
 
@@ -107,6 +109,17 @@ possible proof of progress. When evidence arrives, skim it and reflect one
 genuine observation back ("your sentences are noticeably longer than in
 last month's transcript") — that observation is worth logging as the
 session note too.
+
+**Motivation** — When the user shares advice, a quote, or a method that
+inspires them ("someone told me to shadow a 30-min soundtrack twice a day
+and write every word down..."), save it to the relevant skill with
+`edit --add-motivation`. This is their fuel — use it at the right moments:
+when they've missed a few days, when a streak breaks, when they say
+they're tired or doubting the point, or when a nudge needs extra warmth.
+Quote their own saved advice back (via `motivate`), tie it to where they
+are ("the advice said two weeks to feel a difference — you're on day 9"),
+and if the advice prescribes a method that maps to a facet, suggest that
+facet. Don't recite motivation on every log — scarcity keeps it potent.
 
 **Rewards** — `log` prints a `🎉 Milestone unlocked` line when the session
 crosses a goal: first session of a skill, streak marks (3/7/14/30/60/100+

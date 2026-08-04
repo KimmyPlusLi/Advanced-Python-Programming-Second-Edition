@@ -298,6 +298,7 @@ def cmd_import(args):
                 "facets": item.get("facets", []),
                 "priority": item.get("priority", "normal"),
                 "freq": item.get("freq", 1),
+                "motivation": item.get("motivation", []),
                 "added": date.today().isoformat(),
             }
         )
@@ -603,6 +604,10 @@ def cmd_edit(args):
         s.setdefault("facets", []).extend(
             f for f in args.add_facet if f not in s.get("facets", [])
         )
+    if args.add_motivation:
+        s.setdefault("motivation", []).extend(
+            m for m in args.add_motivation if m not in s.get("motivation", [])
+        )
     if args.remove_facet:
         s["facets"] = [f for f in s.get("facets", []) if f not in args.remove_facet]
     if args.rename:
@@ -667,6 +672,31 @@ def cmd_evidence(args):
         print(f"{e['ts'][:10]} {e['skill']}{note}")
         for p in e["evidence"]:
             print(f"  📎 {p}")
+
+
+def cmd_motivate(args):
+    skills = active(load_skills())
+    if args.skill:
+        name = resolve_skill(args.skill, skills)
+        if name is None:
+            raise SystemExit(f"Unknown skill '{args.skill}'.")
+        skills = [s for s in skills if s["name"] == name]
+    shown = False
+    for s in skills:
+        quotes = s.get("motivation") or []
+        if not quotes:
+            continue
+        shown = True
+        print(f"{s['name']}:")
+        for q in quotes:
+            print(f'  "{q}"')
+        if s.get("why"):
+            print(f"  (your why: {s['why']})")
+    if not shown:
+        print(
+            "No saved motivation yet. Add some with: "
+            'edit "<skill>" --add-motivation "..."'
+        )
 
 
 def cmd_milestones(args):
@@ -1162,6 +1192,8 @@ def main(argv=None):
     sp.add_argument("--freq", help="target: 'daily', '2/day', '3/week', '2-3/week'")
     sp.add_argument("--add-facet", action="append")
     sp.add_argument("--remove-facet", action="append")
+    sp.add_argument("--add-motivation", action="append",
+                    help="save a piece of advice/motivation for this skill")
     sp.add_argument("--rename", help="new name (rewrites logged history too)")
     sp.add_argument("--restore", action="store_true", help="un-archive the skill")
     sp.set_defaults(func=cmd_edit)
@@ -1225,6 +1257,10 @@ def main(argv=None):
     sp = sub.add_parser("review", help="long look-back over months")
     sp.add_argument("--months", type=int, default=6)
     sp.set_defaults(func=cmd_review)
+
+    sp = sub.add_parser("motivate", help="show saved motivation/advice")
+    sp.add_argument("skill", nargs="?", help="filter by skill")
+    sp.set_defaults(func=cmd_motivate)
 
     sp = sub.add_parser("milestones", help="list unlocked milestones")
     sp.set_defaults(func=cmd_milestones)
