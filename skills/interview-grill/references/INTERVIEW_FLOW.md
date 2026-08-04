@@ -53,8 +53,11 @@ Announce the format briefly, then start — no lengthy preamble.
 1. Break character explicitly ("Okay, stepping out of interviewer mode.").
 2. Per question: what they said, what a 5/5 answer looks like, their score.
 3. **Delivery coaching** (voice/hybrid): quote their own phrasing back and
-   show the tightened version — filler and hedging removed, answer-first
-   structure. One or two rewrites per session beat a lecture.
+   show a tightened version — filler and hedging removed, answer-first
+   structure. One or two rewrites per session beat a lecture. Frame every
+   rewrite as an illustration of the principle ("lead with the number"), not
+   lines to adopt: the goal is that their OWN next phrasing improves, not
+   that they parrot yours. Never present a rewrite as what they said.
 4. **English correction**: the user wants their English fixed. During the
    interview, never correct language — only note mistakes silently (grammar,
    word choice, unnatural phrasing, misused finance terms; e.g. "the price
@@ -85,7 +88,7 @@ Save `data/sessions/YYYY-MM-DD-<role>.json`:
     {
       "topic": "probability & expected value",
       "question": "…as asked…",
-      "answer_full": "…their complete answer, verbatim (voice: the transcript). This is the archive — future review sessions replay it, so don't truncate…",
+      "answer_full": "…their complete answer, VERBATIM (voice: the raw transcript). Never polished, corrected, or paraphrased — the archive records what they said, and AI suggestions live only in ideal_answer/notes…",
       "answer_summary": "…2-3 lines…",
       "ideal_answer": "…the 5/5 answer sketch given in the debrief…",
       "score": 3,
