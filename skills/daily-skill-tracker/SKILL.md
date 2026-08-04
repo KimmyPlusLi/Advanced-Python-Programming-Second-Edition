@@ -47,9 +47,9 @@ substring — "log eng 10" works once "English" exists. A skill can have
 **facets** (sub-activities); `suggest` rotates to the least-recently-used
 facet so practice modes don't collapse into one favorite. **High-priority**
 skills (`--high` / `"priority": "high"`) always outrank normal ones in
-suggestions — the user reserves this tier for slow-to-acquire skills:
-English, soft skills (emotional management, street smarts, stakeholder
-communication), trading skills, and exercise. **Frequency** (`--freq`)
+suggestions — reserve this tier for the slow-to-acquire skills the user
+cares most about (typically languages, soft skills, communication,
+fitness, a professional craft). **Frequency** (`--freq`)
 takes specs like `daily`, `2/day`, `3/week`, or `2-3/week` (a range targets
 its lower bound). Daily specs count today's sessions; weekly specs count
 this week's (Mon-Sun). Skills still due rank first in `suggest`, and
@@ -58,9 +58,14 @@ week" → `2-3/week`.
 
 ## How to behave
 
-**First run** — If `skills` shows nothing, offer to import
-`{skill_dir}/examples/starter-skills.json`, then tailor: ask which skills to
-keep, drop, or re-word.
+**First run** — If `skills` shows nothing, set the user up through a short
+conversation, not a form: ask what they wish they were better at, why it
+matters to them (that becomes the skill's "why"), how often they
+realistically want to practice each one, and which deserve the
+high-priority tier. Then create the skills with `add`. Offer
+`{skill_dir}/examples/starter-skills.json` as a template to import and
+tailor if they'd rather start from an example — rename, re-word, add
+facets, and adjust frequencies until the list is genuinely theirs.
 
 **The ledger** — Every message about what the user did and for how long
 goes into the ledger via `log`, including any reflection as the `--note`.
@@ -98,17 +103,17 @@ exercise, high priority, twice a day" → `add "Exercise" --high --freq 2`;
 changed. Prefer `remove` (archive) over `--purge` unless they explicitly
 want the skill gone from the list.
 
-**Soft skills log as observations.** For emotional management, street
-smarts, and stakeholder communication, the note IS the practice: capture
-what they observed or tried in their own words ("Troy pushed back on the
-desk head without raising his voice — named the risk, offered two options").
-Always ask for or extract a note when logging these; months later the
-review quotes these notes back to show growth.
+**Soft skills log as observations.** For skills like emotional
+management, people skills, or communication, the note IS the practice:
+capture what they observed or tried in their own words ("watched my
+manager push back without raising their voice — named the risk, offered
+two options"). Always ask for or extract a note when logging these;
+months later the review quotes these notes back to show growth.
 
 **Evidence** — The user will share artifacts of their practice: a
-transcript of an English conversation with an AI voice assistant, market
-color or a memo they wrote, a strategy idea or backtest they ran. Archive
-these with the session they belong to, never lose them:
+transcript of a conversation with an AI voice assistant, a memo or essay
+they wrote, an idea or project they tested. Archive these with the
+session they belong to, never lose them:
 
 - A file they upload → `attach "<skill>" --file <path>` (or
   `log ... --evidence <path>` when logging at the same time).
@@ -154,10 +159,10 @@ into pressure about the next one.
 
 **Suggesting** — When the user has a spare moment ("I have 10 minutes"),
 run `suggest` and turn the top pick into ONE concrete micro-task sized to
-their time and setting, using the skill's why/facet — e.g. for English:
-"Shadow one paragraph of a news clip"; for street smarts: "In your next
-meeting, watch how Christian opens a disagreement." Offer the runner-up
-only if they decline.
+their time and setting, using the skill's why/facet — e.g. for a language:
+"Shadow one paragraph of a news clip"; for people skills: "In your next
+meeting, watch how the most effective person opens a disagreement." Offer
+the runner-up only if they decline.
 
 **Daily check-in** — For "how's today going", run `today`. If nothing is
 logged, point at the suggestion; a 5-minute session counts. Small and daily

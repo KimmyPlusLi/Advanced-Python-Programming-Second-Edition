@@ -1,0 +1,80 @@
+[
+  {
+    "name": "Exercise",
+    "priority": "high",
+    "freq": "2-3/week",
+    "why": "Stay healthy and energetic for everything else",
+    "facets": [
+      "Cardio",
+      "Strength",
+      "Stretching / mobility"
+    ]
+  },
+  {
+    "name": "English",
+    "priority": "high",
+    "freq": "daily",
+    "why": "Communicate natively and confidently at work and in life",
+    "facets": [
+      "TV shows & news dictation",
+      "Imitation & speaking practice",
+      "Reading books from Freddy",
+      "Writing",
+      "AI-assisted practice",
+      "Soundtrack shadowing + dictation (the 30-min method)"
+    ],
+    "motivation": [
+      "Listen to this soundtrack (30 minutes) at least twice a day, read out loud following the author, and at the same time write down every word of the speech on paper. Do it for a week — you won't notice any difference. Two weeks — you start to feel some difference. Do it every day for a month and you'll be a changed person when it comes to English."
+    ]
+  },
+  {
+    "name": "Communication",
+    "priority": "high",
+    "freq": "2-3/week",
+    "why": "Communicate achievements, problems and solutions with senior management",
+    "facets": [
+      "Practice a 30-second achievement summary",
+      "Frame a problem with proposed solutions",
+      "Rehearse answering a hard question simply"
+    ]
+  },
+  {
+    "name": "Soft skills",
+    "priority": "high",
+    "freq": "2-3/week",
+    "why": "Emotional management and street smarts — stay calm under pressure, be a role model for 聪聪, and learn how effective people deal with people and work",
+    "facets": [
+      "Notice and name emotions in the moment",
+      "Reflect on one situation handled well or badly",
+      "Practice a calm response to a stressful trigger",
+      "Observe how Ben speaks and acts",
+      "Observe how Troy speaks and acts",
+      "Observe how Christian speaks and acts",
+      "Try one observed technique myself"
+    ]
+  },
+  {
+    "name": "Trading skills",
+    "priority": "high",
+    "freq": "2-3/week",
+    "why": "Sharpen pricing and trading of rates derivatives, and build systematic strategies",
+    "facets": [
+      "SOFR futures and options",
+      "Treasury bond basis",
+      "Volatilities",
+      "XVA challenges",
+      "Commodities",
+      "Strategy ideas & research",
+      "Backtesting implementation",
+      "Reviewing results & iterating"
+    ]
+  },
+  {
+    "name": "Domain Knowledge",
+    "freq": "1-2/week",
+    "why": "Deepen the technical foundations behind my work",
+    "facets": [
+      "Machine learning / deep learning"
+    ]
+  }
+]
