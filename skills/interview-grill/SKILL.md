@@ -89,6 +89,32 @@ Follow `references/INTERVIEW_FLOW.md` strictly. The essentials:
    weekly gap analysis, say so — interview weakness + JD demand = top
    learning priority.
 
+## Reviewing and iterating (archive & retrieve)
+
+Every session is archived in full — questions, the user's verbatim answers
+(voice transcripts included), ideal-answer sketches, scores, corrections.
+`scripts/sessions.py` retrieves them; use it whenever the user wants to look
+back or iterate:
+
+- "show my past sessions" → `python3 scripts/sessions.py list`
+- "how have I done on market making?" →
+  `python3 scripts/sessions.py topic "market making"` — full cross-session
+  history of that topic with the score trajectory; walk them through how
+  their answers evolved and what still separates them from 5/5.
+- "let's redo my weak questions" → **retake session**:
+  `python3 scripts/sessions.py retake` returns their lowest-scoring archived
+  questions (one per topic). Re-ask each with the numbers/underlier varied
+  (same concept, fresh instance — no answer memorization), run it as a
+  normal interview segment, and in the debrief show old answer vs new answer
+  side by side with the score delta. Record each as a question with
+  `retake_of` set so progress tracks the improvement.
+- "replay Tuesday's interview" → `python3 scripts/sessions.py show <date>`.
+- "export my archive" → `python3 scripts/sessions.py export` (single
+  markdown file; send it to Telegram as a document).
+
+For this to work, archiving must be complete: always fill `answer_full` and
+`ideal_answer` when saving a session — a summary can't be iterated on.
+
 ## Rules
 
 - Honest scoring beats kindness: an inflated score costs the user a real

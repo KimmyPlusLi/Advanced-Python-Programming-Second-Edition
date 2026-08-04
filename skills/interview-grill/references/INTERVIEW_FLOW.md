@@ -85,9 +85,12 @@ Save `data/sessions/YYYY-MM-DD-<role>.json`:
     {
       "topic": "probability & expected value",
       "question": "…as asked…",
-      "answer_summary": "…2-3 lines of what they actually said…",
+      "answer_full": "…their complete answer, verbatim (voice: the transcript). This is the archive — future review sessions replay it, so don't truncate…",
+      "answer_summary": "…2-3 lines…",
+      "ideal_answer": "…the 5/5 answer sketch given in the debrief…",
       "score": 3,
-      "notes": "right EV setup, arithmetic slip on the conditional"
+      "notes": "right EV setup, arithmetic slip on the conditional",
+      "retake_of": "2026-08-01 optional — set when re-asking an archived question"
     }
   ],
   "communication_score": 4,
