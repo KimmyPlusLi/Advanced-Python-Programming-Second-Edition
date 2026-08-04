@@ -89,6 +89,35 @@ def entry_date(e: dict) -> date:
     return datetime.fromisoformat(e["ts"]).date()
 
 
+def parse_freq(v):
+    """Freq spec -> (min_times, period). Accepts 1, "daily", "2/day",
+    "3/week", "2-3/week" (a range counts its lower bound as the target)."""
+    import re
+    if isinstance(v, (int, float)):
+        return max(1, int(v)), "day"
+    s = str(v).strip().lower()
+    if s in ("", "daily", "everyday", "every day"):
+        return 1, "day"
+    if s.isdigit():
+        return max(1, int(s)), "day"
+    m = re.fullmatch(r"(\d+)(?:\s*-\s*(\d+))?\s*(?:x\s*)?/\s*(day|week)", s)
+    if not m:
+        raise SystemExit(
+            f"Bad frequency '{v}' — use forms like 'daily', '2/day', "
+            f"'3/week', '2-3/week'."
+        )
+    return max(1, int(m.group(1))), m.group(3)
+
+
+def freq_str(v):
+    n, per = parse_freq(v)
+    raw = str(v).strip().lower()
+    times = raw.split("/")[0].strip() if "/" in raw else str(n)
+    if per == "day" and times in ("", "1"):
+        return "daily"
+    return f"{times}x/{per}"
+
+
 def streak_for(dates: set, today: date) -> int:
     """Consecutive practice days ending today (or yesterday if today not yet logged)."""
     if not dates:
@@ -128,7 +157,7 @@ def cmd_add(args):
     save_skills(skills)
     extras = [x for x in (
         "high priority" if args.high else "",
-        f"{args.freq}x/day" if args.freq > 1 else "",
+        freq_str(args.freq) if parse_freq(args.freq) != (1, "day") else "",
     ) if x]
     print(f"Added skill: {args.name}" + (f" ({', '.join(extras)})" if extras else ""))
 
@@ -173,8 +202,8 @@ def cmd_skills(args):
         total = sum(e["minutes"] for e in entries)
         mark = "★" if s["priority"] == "high" else " "
         line = f"{mark} {s['name']} — {fmt_minutes(total)} over {len(entries)} session(s)"
-        if s.get("freq", 1) > 1:
-            line += f", target {s['freq']}x/day"
+        if parse_freq(s.get("freq", 1)) != (1, "day"):
+            line += f", target {freq_str(s['freq'])}"
         if s.get("archived"):
             line += " [archived]"
         if entries:
@@ -231,8 +260,16 @@ def rank_suggestions(skills, entries, today):
         gap = (today - last).days if last else 10**6
         total = sum(e["minutes"] for e in sk)
         done_today = sum(1 for e in sk if entry_date(e) == today)
-        due = max(0, s.get("freq", 1) - done_today)
-        ranked.append((due == 0, s["priority"] != "high", -gap, total, s, gap, due))
+        fmin, per = parse_freq(s.get("freq", 1))
+        if per == "day":
+            due = max(0, fmin - done_today)
+        else:
+            week_start = today - timedelta(days=today.weekday())
+            done_week = sum(1 for e in sk if week_start <= entry_date(e) <= today)
+            due = 0 if done_today else max(0, fmin - done_week)
+        ranked.append(
+            (due == 0, s["priority"] != "high", -gap, total, s, gap, due, per)
+        )
     ranked.sort(key=lambda r: (r[0], r[1], r[2], r[3], r[4]["name"].lower()))
     return ranked
 
@@ -257,14 +294,16 @@ def cmd_suggest(args):
     entries = load_log()
     today = date.today()
     print("What to practice now (due & most neglected first, ★ = high priority):")
-    for _, _, _, total, s, gap, due in rank_suggestions(skills, entries, today)[:3]:
+    for _, _, _, total, s, gap, due, per in rank_suggestions(skills, entries, today)[:3]:
         mark = "★" if s["priority"] == "high" else " "
         since = "never practiced" if gap >= 10**6 else (
             "practiced today" if gap == 0 else f"last practiced {gap}d ago"
         )
         line = f"{mark} {s['name']} — {since}, {fmt_minutes(total)} total"
-        if s.get("freq", 1) > 1 and due:
-            line += f" [{due} of {s['freq']} still due today]"
+        if due and per == "week":
+            line += f" [{due} more this week]"
+        elif due > 1:
+            line += f" [{due} more today]"
         facet = next_facet(s, entries)
         if facet:
             line += f" → try: {facet}"
@@ -279,7 +318,8 @@ def cmd_today(args):
     today = date.today()
     todays = [e for e in entries if entry_date(e) == today]
     still_due = [
-        (s, due) for *_, s, _, due in rank_suggestions(skills, entries, today)
+        (s, due, per)
+        for *_, s, _, due, per in rank_suggestions(skills, entries, today)
         if due > 0
     ]
     if todays:
@@ -294,9 +334,12 @@ def cmd_today(args):
             print(f"  • {e['skill']}{facet}: {fmt_minutes(e['minutes'])}{note}")
         if still_due:
             print(
-                "Still due today: "
+                "Still due: "
                 + ", ".join(
-                    s["name"] + (f" x{d}" if d > 1 else "") for s, d in still_due
+                    s["name"]
+                    + (f" ({d} more this week)" if per == "week"
+                       else f" x{d}" if d > 1 else "")
+                    for s, d, per in still_due
                 )
             )
         return
@@ -414,6 +457,7 @@ def cmd_edit(args):
     if args.priority:
         s["priority"] = args.priority
     if args.freq:
+        parse_freq(args.freq)  # validate
         s["freq"] = args.freq
     if args.restore:
         s.pop("archived", None)
@@ -902,15 +946,15 @@ def main(argv=None):
     sp.add_argument("--why", help="one-line reason this skill matters")
     sp.add_argument("--facet", action="append", help="sub-activity (repeatable)")
     sp.add_argument("--high", action="store_true", help="high priority in suggestions")
-    sp.add_argument("--freq", type=int, default=1,
-                    help="target sessions per day (1=daily, 2=twice a day, ...)")
+    sp.add_argument("--freq", default="daily",
+                    help="target: 'daily', '2/day', '3/week', '2-3/week'")
     sp.set_defaults(func=cmd_add)
 
     sp = sub.add_parser("edit", help="update a skill's why/facets/priority/freq")
     sp.add_argument("skill")
     sp.add_argument("--why")
     sp.add_argument("--priority", choices=["high", "normal"])
-    sp.add_argument("--freq", type=int, help="target sessions per day")
+    sp.add_argument("--freq", help="target: 'daily', '2/day', '3/week', '2-3/week'")
     sp.add_argument("--add-facet", action="append")
     sp.add_argument("--remove-facet", action="append")
     sp.add_argument("--rename", help="new name (rewrites logged history too)")
@@ -977,4 +1021,7 @@ def main(argv=None):
 
 
 if __name__ == "__main__":
-    main()
+    try:
+        main()
+    except BrokenPipeError:
+        sys.exit(0)

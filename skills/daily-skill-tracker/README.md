@@ -51,8 +51,9 @@ the most neglected skill with a concrete micro-task.
   high; they always outrank normal skills in suggestions.
 - **Soft skills log as observations** — for skills like "street smarts" the
   note is the practice; reviews quote early notes against recent ones.
-- **Frequency targets** — `--freq N` sets sessions per day (everyday, twice
-  a day, 3x/day); skills still due today rank first in suggestions.
+- **Frequency targets** — `--freq` takes `daily`, `2/day`, `3/week`, or
+  `2-3/week`; skills still due (today, or this week for weekly targets)
+  rank first in suggestions.
 - **Silent-unless-needed reminders** — `today --nudge` prints nothing once
   you've practiced, so a daily cron only pings you when it should
   (`--strict` keeps nudging until every per-day target is met).

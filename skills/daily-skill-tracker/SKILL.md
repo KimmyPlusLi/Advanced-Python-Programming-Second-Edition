@@ -24,10 +24,10 @@ python3 {skill_dir}/scripts/tracker.py <command> [args]
 
 | Intent | Command |
 |---|---|
-| Track a new skill | `add "<skill>" [--why "..."] [--facet "..."]... [--high] [--freq N]` |
+| Track a new skill | `add "<skill>" [--why "..."] [--facet "..."]... [--high] [--freq SPEC]` |
 | Bulk-add skills | `import <file.json>` (see `examples/starter-skills.json`) |
 | List skills | `skills [--all]` |
-| Change a skill | `edit "<skill>" [--why] [--priority high\|normal] [--freq N] [--add-facet] [--remove-facet] [--rename] [--restore]` |
+| Change a skill | `edit "<skill>" [--why] [--priority high\|normal] [--freq SPEC] [--add-facet] [--remove-facet] [--rename] [--restore]` |
 | Remove a skill | `remove "<skill>"` (archives; `--purge` to drop from the list — history always kept) |
 | Log a session | `log "<skill>" <minutes> [--note "..."] [--facet "..."] [--at DATE]` |
 | What to practice now | `suggest` |
@@ -44,10 +44,12 @@ facet so practice modes don't collapse into one favorite. **High-priority**
 skills (`--high` / `"priority": "high"`) always outrank normal ones in
 suggestions — the user reserves this tier for slow-to-acquire skills:
 English, soft skills (emotional management, street smarts, stakeholder
-communication), trading skills, and exercise. **Frequency** (`--freq`) is
-the target sessions per day (1 = everyday, 2 = twice a day, 3 = 3x/day);
-skills still due today rank first in `suggest`, and `today` lists what's
-still due.
+communication), trading skills, and exercise. **Frequency** (`--freq`)
+takes specs like `daily`, `2/day`, `3/week`, or `2-3/week` (a range targets
+its lower bound). Daily specs count today's sessions; weekly specs count
+this week's (Mon-Sun). Skills still due rank first in `suggest`, and
+`today` lists what's still due — "twice a day" → `2/day`, "2-3 times a
+week" → `2-3/week`.
 
 ## How to behave
 

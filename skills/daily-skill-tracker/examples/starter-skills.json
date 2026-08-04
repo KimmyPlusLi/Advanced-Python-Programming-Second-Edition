@@ -2,6 +2,7 @@
   {
     "name": "Exercise",
     "priority": "high",
+    "freq": "2-3/week",
     "why": "Stay healthy and energetic for everything else",
     "facets": [
       "Cardio",
@@ -12,6 +13,7 @@
   {
     "name": "English",
     "priority": "high",
+    "freq": "daily",
     "why": "Communicate natively and confidently at work and in life",
     "facets": [
       "TV shows & news dictation",
@@ -22,29 +24,9 @@
     ]
   },
   {
-    "name": "Emotional management",
-    "priority": "high",
-    "why": "Stay calm under pressure; be a role model for 聪聪",
-    "facets": [
-      "Notice and name emotions in the moment",
-      "Reflect on one situation handled well or badly",
-      "Practice a calm response to a stressful trigger"
-    ]
-  },
-  {
-    "name": "Street smarts",
-    "priority": "high",
-    "why": "Learn how effective people deal with people and work",
-    "facets": [
-      "Observe how Ben speaks and acts",
-      "Observe how Troy speaks and acts",
-      "Observe how Christian speaks and acts",
-      "Try one observed technique myself"
-    ]
-  },
-  {
     "name": "Stakeholder communication",
     "priority": "high",
+    "freq": "daily",
     "why": "Communicate achievements, problems and solutions with senior management",
     "facets": [
       "Practice a 30-second achievement summary",
@@ -53,22 +35,31 @@
     ]
   },
   {
+    "name": "Soft skills",
+    "priority": "high",
+    "freq": "2-3/week",
+    "why": "Emotional management and street smarts — stay calm under pressure, be a role model for 聪聪, and learn how effective people deal with people and work",
+    "facets": [
+      "Notice and name emotions in the moment",
+      "Reflect on one situation handled well or badly",
+      "Practice a calm response to a stressful trigger",
+      "Observe how Ben speaks and acts",
+      "Observe how Troy speaks and acts",
+      "Observe how Christian speaks and acts",
+      "Try one observed technique myself"
+    ]
+  },
+  {
     "name": "Trading skills",
     "priority": "high",
-    "why": "Sharpen pricing and trading of interest rate derivatives",
+    "freq": "2-3/week",
+    "why": "Sharpen pricing and trading of rates derivatives, and build systematic strategies",
     "facets": [
       "SOFR futures and options",
       "Treasury bond basis",
       "Volatilities",
       "XVA challenges",
-      "Commodities"
-    ]
-  },
-  {
-    "name": "Trading strategies & backtesting",
-    "priority": "high",
-    "why": "Build and backtest systematic trading strategies",
-    "facets": [
+      "Commodities",
       "Strategy ideas & research",
       "Backtesting implementation",
       "Reviewing results & iterating"
