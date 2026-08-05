@@ -1,6 +1,6 @@
 {
   "_comment": "Personal preferences for interview sessions. The SKILL reads these instead of assuming; edit to taste.",
-  "channel": "discord",
+  "channel": "telegram",
   "preferred_mode": "voice",
   "coach_communication": true,
   "coach_language": true,
