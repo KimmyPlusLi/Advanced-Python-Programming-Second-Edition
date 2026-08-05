@@ -7,12 +7,20 @@ OpenClaw transcribes inbound voice notes to text via its configured
 speech-to-text provider, and outbound voice needs a configured TTS provider.
 At session start in voice mode, determine what this deployment supports:
 
-- STT + TTS → **full voice**: questions and debrief summary spoken, scorecard
-  in text.
+- **Voice bridge** (best): if the deployment runs the `voice-bridge`
+  companion (`skills/voice-bridge/`), the user talks in a Discord voice
+  channel and your text replies in the paired channel are spoken aloud
+  automatically. From your side it is just a text conversation — but write
+  replies to be HEARD: short sentences, no markdown tables/lists mid-
+  session, numbers restated. Messages starting with `🎙` are the user's
+  transcribed speech, verbatim — treat them as their spoken answers and
+  archive them unedited.
+- STT + TTS voice notes → **full voice**: questions and debrief summary
+  spoken, scorecard in text.
 - STT only → **hybrid**: your questions in text, user answers by voice note.
   Tell the user once; hybrid still trains verbal delivery.
-- Neither → text mode; tell the user what to configure (an STT/TTS provider
-  in OpenClaw's config) to unlock voice.
+- Neither → text mode; tell the user what to configure (the voice-bridge, or
+  an STT/TTS provider in OpenClaw's config) to unlock voice.
 
 ## 1. Session setup
 

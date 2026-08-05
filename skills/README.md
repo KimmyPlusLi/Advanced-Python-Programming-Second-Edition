@@ -14,4 +14,10 @@ markdown playbooks, fully configurable, MIT licensed.
   correction, verbatim session archives, and cross-session progress
   tracking. Works standalone; better together with the monitor.
 
-Each skill's README covers install, setup, and customization.
+- **[voice-bridge](voice-bridge/)** — companion Discord bot (Node.js) that
+  turns interview-grill into a true spoken conversation: you talk in a voice
+  channel, the agent hears you (STT) and answers aloud (TTS), relayed
+  through the agent's normal Discord text integration. Job digests stay
+  text; interviews become dialogue.
+
+Each component's README covers install, setup, and customization.

@@ -1,0 +1,11 @@
+{
+  "_comment": "Copy to config.json and fill in. IDs are Discord snowflakes (enable Developer Mode in Discord, right-click -> Copy ID). Secrets go in .env, never here.",
+  "guildId": "YOUR_SERVER_ID",
+  "textChannelId": "PAIRED_TEXT_CHANNEL_ID",
+  "agentUserId": "OPENCLAW_BOT_USER_ID",
+  "mentionAgent": true,
+  "allowedUserIds": [],
+  "silenceMs": 900,
+  "stt": { "model": "gpt-4o-transcribe", "language": "" },
+  "tts": { "model": "gpt-4o-mini-tts", "voice": "alloy", "speed": 1.0 }
+}
