@@ -8,7 +8,13 @@ This is agent work (reading comprehension), run after the weekly digest.
 
 - Top `digest.gap_analysis_top_n` jobs from `data/matched_jobs.json`
   (highest score first). If a job's `description` is empty (common for
-  Workday/agent sources), fetch its URL and read the full posting.
+  Workday/agent sources), fetch its URL, read the full posting, and write
+  the description into the job's archive entry in `data/jd_archive/` so it
+  is captured before the posting dies.
+- The durable JD archive (`scripts/jd_archive.py`) for history:
+  `trend <term>` shows how often a requirement appears month over month, and
+  closed postings still count as demand evidence — use them for the
+  week-over-week section instead of relying only on the previous report.
 - `background` from `config/profile.json` (skills, credentials, asset
   classes, track record).
 - The skill-frequency table from the weekly digest (demand trends).

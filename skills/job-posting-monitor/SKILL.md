@@ -64,6 +64,22 @@ Steps 1–3 as above, then:
    resulting report on the configured channel after the digest. Save a copy to
    `data/digests/gap-analysis-YYYY-MM-DD.md`.
 
+## JD archive (durable history)
+
+`digest.py` archives every matched posting — full description included — to
+`data/jd_archive/<job_id>.json`, forever: closed postings are marked
+`status: closed`, never deleted, and description edits keep the prior text
+in `previous_descriptions`. Retrieval via `scripts/jd_archive.py`:
+
+- "what did that closed Citadel PM role require?" → `show citadel`
+- "which postings ask for kdb?" → `search kdb`
+- "is python demand growing?" → `trend python` (share of postings by month)
+- `list --status closed`, `export` for the full archive as markdown.
+
+Use the archive whenever the user asks about a posting no longer live, and
+for requirement trends in the weekly gap analysis. interview-grill also reads
+it when current matches are empty.
+
 ## Customization
 
 Everything is config, no code edits needed. When the user asks to change

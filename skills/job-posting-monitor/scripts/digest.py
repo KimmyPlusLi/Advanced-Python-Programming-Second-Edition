@@ -1,9 +1,19 @@
 #!/usr/bin/env python3
-"""Build the daily or weekly digest from matched jobs, maintaining seen-state.
+"""Build the daily or weekly digest from matched jobs, maintaining seen-state
+and the durable JD archive.
 
 State: data/state/seen_jobs.json — {job_id: {first_seen, last_seen, title,
 company, url, matched_role, score}}. A job is NEW if its id is not in state.
 Jobs not seen for `PRUNE_DAYS` are pruned weekly (posting closed).
+
+JD archive: data/jd_archive/<job_id>.json — the full record of every matched
+job ever seen, INCLUDING its description text, kept forever (postings vanish
+from the web once filled; the archive is what lets gap analysis trend
+requirements over time and interview-grill drill from dead JDs). Written on
+first sight; if a posting's description text later changes, the old text is
+kept in `previous_descriptions`; when a job is pruned from active state its
+archive entry is marked status=closed, never deleted. Retrieval:
+scripts/jd_archive.py.
 
 Daily digest  = new matches only.
 Weekly digest = all active matches grouped by role + skill-frequency trends
@@ -23,8 +33,46 @@ from pathlib import Path
 SKILL_DIR = Path(__file__).resolve().parent.parent
 DATA_DIR = SKILL_DIR / "data"
 STATE_PATH = DATA_DIR / "state" / "seen_jobs.json"
+ARCHIVE_DIR = DATA_DIR / "jd_archive"
 CHUNK_LIMIT = 3500
 PRUNE_DAYS = 21
+
+
+def archive_job(job, today):
+    """Create or update the durable archive entry for a matched job."""
+    ARCHIVE_DIR.mkdir(parents=True, exist_ok=True)
+    path = ARCHIVE_DIR / f"{job['id']}.json"
+    desc = (job.get("description") or "").strip()
+    if not path.exists():
+        entry = {**job, "status": "active", "first_archived": today,
+                 "last_updated": today, "previous_descriptions": []}
+    else:
+        entry = json.loads(path.read_text())
+        old_desc = (entry.get("description") or "").strip()
+        if desc and desc != old_desc:
+            if old_desc:
+                entry["previous_descriptions"].append(
+                    {"archived_until": today, "description": old_desc})
+            entry["description"] = desc
+        # Refresh volatile fields; never lose a description we already have.
+        for key in ("title", "location", "url", "score", "matched_role",
+                    "matched_role_label", "keyword_hits"):
+            if job.get(key) is not None:
+                entry[key] = job[key]
+        entry["status"] = "active"
+        entry.pop("closed_on", None)
+        entry["last_updated"] = today
+    path.write_text(json.dumps(entry, indent=2))
+
+
+def close_archived(job_id, today):
+    path = ARCHIVE_DIR / f"{job_id}.json"
+    if path.exists():
+        entry = json.loads(path.read_text())
+        if entry.get("status") != "closed":
+            entry["status"] = "closed"
+            entry["closed_on"] = today
+            path.write_text(json.dumps(entry, indent=2))
 
 
 def chunked(lines):
@@ -90,6 +138,7 @@ def main():
         else:
             entry["last_seen"] = today
             entry["score"] = j["score"]
+        archive_job(j, today)
 
     pruned = 0
     if args.mode == "weekly":
@@ -97,6 +146,7 @@ def main():
         stale = [k for k, v in state.items() if v["last_seen"] < cutoff]
         for k in stale:
             del state[k]
+            close_archived(k, today)
         pruned = len(stale)
 
     dcfg = profile.get("digest", {})

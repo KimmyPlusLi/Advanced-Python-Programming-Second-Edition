@@ -1,13 +1,15 @@
 #!/usr/bin/env python3
 """Distill the most testable interview topics into data/topics.json.
 
-Three sources, in order of preference:
-  1. Matched JDs from the job-posting-monitor skill (path set in
+Sources, in order of preference:
+  1. --jd FILE: any job description saved as a text file (pasted by the
+     user) — standalone mode, no job-posting-monitor needed.
+  2. Current matched JDs from the job-posting-monitor skill (path set in
      config/settings.json -> topics_source.matched_jobs_path, or --matched):
      topics ranked by JD-demand frequency x live-testability.
-  2. --jd FILE: any job description saved as a text file (pasted by the
-     user) — standalone mode, no job-posting-monitor needed.
-  3. Built-in role priors (ROLE_PRIORS) when neither is available.
+  3. job-posting-monitor's durable JD archive (data/jd_archive/ next to the
+     matched file) — covers postings that have since closed.
+  4. Built-in role priors (ROLE_PRIORS) when nothing else is available.
 
 Usage: python3 build_topics.py [--matched PATH | --jd FILE] [--top N]
 """
@@ -117,6 +119,8 @@ def main():
 
     out_roles = {}
     matched_path = Path(args.matched)
+    jobs = []
+    source = None
     if args.jd:
         text = Path(args.jd).read_text()
         out_roles["custom_jd"] = {
@@ -124,8 +128,21 @@ def main():
             "topics": score_jobs([{"title": "", "description": text}], args.top),
         }
         source = f"jd_file:{args.jd}"
-    elif matched_path.exists() and json.loads(matched_path.read_text()).get("jobs"):
-        jobs = json.loads(matched_path.read_text())["jobs"]
+    else:
+        if matched_path.exists():
+            jobs = json.loads(matched_path.read_text()).get("jobs", [])
+            source = str(matched_path)
+        if not jobs:
+            # Fall back to the monitor's durable JD archive (includes closed
+            # postings — still real demand signal for interview prep).
+            archive_dir = matched_path.parent / "jd_archive"
+            for p in sorted(archive_dir.glob("*.json")) if archive_dir.exists() else []:
+                try:
+                    jobs.append(json.loads(p.read_text()))
+                except (json.JSONDecodeError, OSError):
+                    continue
+            source = str(archive_dir) if jobs else None
+    if jobs:
         by_role = defaultdict(list)
         for j in jobs:
             by_role[j.get("matched_role", "unknown")].append(j)
@@ -134,8 +151,7 @@ def main():
                 "jobs_analyzed": len(role_jobs),
                 "topics": score_jobs(role_jobs, args.top),
             }
-        source = str(matched_path)
-    else:
+    if not out_roles:
         # Built-in priors — standalone install or empty pipeline.
         for role, order in ROLE_PRIORS.items():
             out_roles[role] = {
