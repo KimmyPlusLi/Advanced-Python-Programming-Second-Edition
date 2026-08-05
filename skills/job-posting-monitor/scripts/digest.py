@@ -87,15 +87,29 @@ def chunked(lines):
     return "\n".join(out)
 
 
-def fmt_job(j, state_entry=None):
+def fmt_comp(comp):
+    if not comp:
+        return ""
+    c, lo, hi = comp["currency"], comp["min"], comp["max"]
+    rng = f"{c}{lo // 1000}k" if lo == hi else f"{c}{lo // 1000}k–{c}{hi // 1000}k"
+    return f" 💰{rng}"
+
+
+def fmt_job(j, state_entry=None, apps=None):
     loc = f" — {j['location']}" if j.get("location") else ""
     age = ""
     if state_entry:
         age = f" _(first seen {state_entry['first_seen'][:10]})_"
+    status = ""
+    app = (apps or {}).get(j["id"])
+    if app:
+        emoji = {"applied": "📨", "interviewing": "🎤", "offer": "🏆",
+                 "rejected": "⛔", "withdrawn": "🚫"}.get(app["status"], "")
+        status = f" {emoji}{app['status']}"
     kws = ", ".join(j.get("keyword_hits", [])[:6])
     kw_line = f"\n  ‣ {kws}" if kws else ""
     return (f"• [{j['title']}]({j['url']}) — **{j['company']}**{loc} "
-            f"(score {j['score']}){age}{kw_line}")
+            f"(score {j['score']}){fmt_comp(j.get('comp'))}{status}{age}{kw_line}")
 
 
 def skill_frequency(jobs, lexicon):
@@ -125,6 +139,8 @@ def main():
 
     STATE_PATH.parent.mkdir(parents=True, exist_ok=True)
     state = json.loads(STATE_PATH.read_text()) if STATE_PATH.exists() else {}
+    apps_path = DATA_DIR / "state" / "applications.json"
+    apps = json.loads(apps_path.read_text()) if apps_path.exists() else {}
 
     new_jobs = []
     for j in jobs:
@@ -161,7 +177,7 @@ def main():
         for role, js in by_role.items():
             lines.append(f"__{role}__")
             for j in js:
-                lines.append(fmt_job(j))
+                lines.append(fmt_job(j, apps=apps))
             lines.append("")
         if len(new_jobs) > cap:
             lines.append(f"…and {len(new_jobs) - cap} more (see weekly digest).")
@@ -179,7 +195,19 @@ def main():
         for role, js in by_role.items():
             lines.append(f"__{role} ({len(js)})__")
             for j in js:
-                lines.append(fmt_job(j, state.get(j["id"])))
+                lines.append(fmt_job(j, state.get(j["id"]), apps=apps))
+            lines.append("")
+        if apps:
+            from applications import followups_due
+            counts = {}
+            for a in apps.values():
+                counts[a["status"]] = counts.get(a["status"], 0) + 1
+            lines.append("__Application pipeline__")
+            lines.append("• " + ", ".join(f"{k}: {v}" for k, v in sorted(counts.items())))
+            for d in followups_due(apps, profile.get("followup_days", 10),
+                                   today=now.date()):
+                lines.append(f"• ⏰ follow up: {d['company']} — {d['title']} "
+                             f"(applied, quiet {d['days_since_update']}d)")
             lines.append("")
         freq = skill_frequency(jobs, profile.get("skill_lexicon", []))
         if freq:

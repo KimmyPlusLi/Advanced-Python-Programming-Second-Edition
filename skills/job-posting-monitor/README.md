@@ -43,6 +43,15 @@ Tell your agent to set up the skill; it follows `references/SETUP.md`:
    vendors, so expect to fix a few.
 3. Create two cron jobs (daily morning, weekly Sunday evening).
 
+Beyond the digests: stated salary ranges are extracted and shown (💰, never
+estimated — only what the posting says); an application tracker annotates
+postings you've applied to (📨🎤🏆⛔🚫) and nudges follow-ups; every matched
+JD is archived forever (full text, even after the posting dies) with
+search/trend retrieval; per-posting deep dives explain fit, gaps, and what
+to emphasize on your resume; an optional Adzuna aggregator source catches
+relevant roles at firms not on your list; and the agent answers ad-hoc
+questions between digests from local data.
+
 ## Customize
 
 See the Customization section of `SKILL.md`. Short version: firms live in

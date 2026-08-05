@@ -25,6 +25,38 @@ from pathlib import Path
 SKILL_DIR = Path(__file__).resolve().parent.parent
 DATA_DIR = SKILL_DIR / "data"
 
+# --- compensation extraction (deterministic, never guesses) ---------------
+_AMT = r"(\d{2,3}(?:,\d{3})+|\d{2,3}\.?\d?\s*[kK]|\d{5,7})"
+_CUR = r"([$£€])"
+_RANGE_RX = re.compile(_CUR + r"\s*" + _AMT + r"\s*(?:-|–|—|to)\s*(?:" + _CUR + r"\s*)?" + _AMT)
+_SINGLE_RX = re.compile(r"(?:up to|base(?:\s+salary)?\s+of|salary\s+of)\s*" + _CUR + r"\s*" + _AMT,
+                        re.IGNORECASE)
+
+
+def _amount(s):
+    s = s.strip().replace(",", "")
+    if s.lower().endswith("k"):
+        return int(float(s[:-1]) * 1000)
+    return int(s)
+
+
+def extract_comp(text):
+    """Return {'min','max','currency','raw'} for the first stated annual
+    salary range/figure, or None. Only ever reports what the text states."""
+    if not text:
+        return None
+    m = _RANGE_RX.search(text)
+    if m:
+        cur, lo, hi = m.group(1), _amount(m.group(2)), _amount(m.group(4))
+        if 20_000 <= lo <= hi <= 5_000_000:
+            return {"min": lo, "max": hi, "currency": cur, "raw": m.group(0).strip()}
+    m = _SINGLE_RX.search(text)
+    if m:
+        cur, amt = m.group(1), _amount(m.group(2))
+        if 20_000 <= amt <= 5_000_000:
+            return {"min": amt, "max": amt, "currency": cur, "raw": m.group(0).strip()}
+    return None
+
 
 def compile_all(patterns):
     return [re.compile(p, re.IGNORECASE) for p in patterns]
@@ -79,6 +111,11 @@ def score_job(job, profile, compiled):
             kw_points += pts
             kw_hits.append(kw)
 
+    comp = extract_comp(job.get("description") or "")
+    min_comp = profile.get("compensation", {}).get("min_annual", 0)
+    if comp and min_comp and comp["max"] < min_comp:
+        return None
+
     return {
         **job,
         "matched_role": matched_role["key"],
@@ -86,6 +123,7 @@ def score_job(job, profile, compiled):
         "score": role_weight + kw_points + loc_bonus,
         "score_breakdown": {"role": role_weight, "keywords": kw_points, "location": loc_bonus},
         "keyword_hits": sorted(kw_hits),
+        "comp": comp,
     }
 
 

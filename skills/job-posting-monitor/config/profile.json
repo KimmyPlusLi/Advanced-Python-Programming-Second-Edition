@@ -86,12 +86,18 @@
     "location_bonus": 5
   },
   "min_score": 60,
+  "compensation": {
+    "_comment": "min_annual drops postings whose STATED max comp is below this; postings with no stated comp are never dropped. 0 = off.",
+    "min_annual": 0
+  },
+  "followup_days": 10,
   "digest": {
     "channel": "telegram",
     "max_daily_items": 25,
     "max_weekly_items": 60,
     "notify_when_empty": false,
-    "gap_analysis_top_n": 12
+    "gap_analysis_top_n": 12,
+    "fit_notes_top_n": 3
   },
   "skill_lexicon": [
     "python", "c++", "rust", "java", "kdb", "q/kdb+", "sql", "machine learning",

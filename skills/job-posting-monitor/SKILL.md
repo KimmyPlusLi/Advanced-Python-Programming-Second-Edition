@@ -50,6 +50,11 @@ weekly run) pointing at this skill.
      channel (`digest.channel`). The file contains `---8<---` markers —
      send each chunk as a separate message, in order (chunks are sized for
      Telegram's 4,096-char limit, safe on other chat channels too). Keep the markdown links intact.
+6. **Fit notes**: after the digest, send ONE short follow-up message with a
+   one-line fit note for the top `digest.fit_notes_top_n` NEW matches:
+   why this specific job fits (citing JD language vs the user's background)
+   and the single biggest gap. Evidence only — no speculation. Skip if there
+   are no new matches.
 
 ## Weekly run (cron, Sunday evening)
 
@@ -57,7 +62,11 @@ Steps 1–3 as above, then:
 
 4. `python3 scripts/digest.py --mode weekly`
 5. Send the weekly digest chunks on the configured channel (same chunk rule).
-6. **Gap analysis**: follow `references/GAP_ANALYSIS.md`. Read the top
+6. The weekly digest includes the application pipeline (status counts and
+   follow-up nudges from `scripts/applications.py`); when a follow-up nudge
+   fires, offer to draft the follow-up FOR THE USER TO REVIEW — never send
+   anything yourself.
+7. **Gap analysis**: follow `references/GAP_ANALYSIS.md`. Read the top
    `digest.gap_analysis_top_n` jobs from `data/matched_jobs.json` (fetch full
    descriptions for any job whose `description` is empty), compare
    requirements against `background` in `config/profile.json`, and send the
@@ -79,6 +88,33 @@ in `previous_descriptions`. Retrieval via `scripts/jd_archive.py`:
 Use the archive whenever the user asks about a posting no longer live, and
 for requirement trends in the weekly gap analysis. interview-grill also reads
 it when current matches are empty.
+
+## Applications (funnel tracking)
+
+When the user says they applied / got an interview / an offer / a rejection
+for a monitored posting:
+`python3 scripts/applications.py mark "<company or title fragment>" --status
+applied|interviewing|offer|rejected|withdrawn [--note "..."]`.
+Digests automatically annotate tracked postings (📨🎤🏆⛔🚫), and the weekly
+digest shows pipeline counts plus follow-up nudges for applications quiet
+longer than `followup_days`. `applications.py list` / `followups` answer
+"where do my applications stand?". Only ever mark what the user tells you —
+never infer an application happened.
+
+## Ad-hoc questions (between digests)
+
+Don't make the user wait for a digest — answer from local data instantly:
+
+- "any new roles today?" → run the daily pipeline steps 1–3 now, then
+  summarize new matches (skip the digest file unless asked).
+- "which postings mention kdb?" → `python3 scripts/jd_archive.py search kdb`
+- "what did that closed Citadel role require?" → `jd_archive.py show citadel`
+- "is python demand growing?" → `jd_archive.py trend python`
+- "tell me more about the <X> role / am I a fit?" → per-posting deep dive:
+  `references/DEEP_DIVE.md`.
+- "where do my applications stand?" → `applications.py list` + `followups`.
+- Volume control: "show me more/fewer" → re-answer from `matched_jobs.json`
+  with a different cap or looser/tighter score cutoff — do not refetch.
 
 ## Customization
 
@@ -110,6 +146,11 @@ behavior, edit the matching knob and confirm what changed:
   attempt to fix `config/companies.json` per `references/SETUP.md` (web-search
   the firm's current ATS) and tell the user what changed.
 - Never invent postings. Every digest item must carry a real URL you fetched.
+- **No invented facts.** Report only what a posting states: unknown comp,
+  location, or seniority is said as "not specified", never estimated. The
+  💰 figures in digests come from `extract_comp` reading the JD text — do
+  not add numbers of your own. Fit notes and deep dives must trace every
+  claim to JD text or the user's stated profile.
 - Adding/removing firms = editing `config/companies.json`; changing match
   behavior = editing `config/profile.json`. Prefer config edits over code
   edits.

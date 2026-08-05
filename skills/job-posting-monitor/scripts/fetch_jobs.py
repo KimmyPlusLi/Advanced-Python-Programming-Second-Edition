@@ -312,6 +312,51 @@ def fetch_html_links(company):
     return jobs
 
 
+def fetch_adzuna(company):
+    """Job-board aggregator (free API: https://developer.adzuna.com) — catches
+    relevant roles at employers not on the monitored-company list. Credentials
+    come from env vars so no secrets live in config. The `company` field of
+    each normalized job is the actual employer, with the source marked adzuna.
+    """
+    import os
+    p = company["params"]
+    app_id = os.environ.get(p.get("app_id_env", "ADZUNA_APP_ID"), "")
+    app_key = os.environ.get(p.get("app_key_env", "ADZUNA_APP_KEY"), "")
+    if not app_id or not app_key:
+        raise RuntimeError("Adzuna credentials missing — set ADZUNA_APP_ID / "
+                           "ADZUNA_APP_KEY (free at developer.adzuna.com) or "
+                           "disable this source (enabled: false)")
+    country = p.get("country", "us")
+    seen, jobs = set(), []
+    for term in p.get("search_terms") or DEFAULT_TERMS:
+        for page in range(1, p.get("max_pages", 2) + 1):
+            q = urllib.parse.urlencode({
+                "app_id": app_id, "app_key": app_key, "what": term,
+                "results_per_page": 50, "content-type": "application/json"})
+            data = http_json(f"https://api.adzuna.com/v1/api/jobs/{country}/search/{page}?{q}")
+            results = data.get("results", [])
+            if not results:
+                break
+            for j in results:
+                jid = str(j.get("id", ""))
+                if not jid or jid in seen:
+                    continue
+                seen.add(jid)
+                employer = (j.get("company") or {}).get("display_name", "") or "Unknown"
+                jobs.append({
+                    "id": job_id("adzuna", jid),
+                    "company": employer,
+                    "category": company.get("category", "aggregator"),
+                    "title": j.get("title", ""),
+                    "location": (j.get("location") or {}).get("display_name", ""),
+                    "url": j.get("redirect_url", ""),
+                    "posted_at": j.get("created"),
+                    "description": strip_html(j.get("description", "")),
+                    "source": "adzuna",
+                })
+    return jobs
+
+
 ADAPTERS = {
     "greenhouse": fetch_greenhouse,
     "lever": fetch_lever,
@@ -319,6 +364,7 @@ ADAPTERS = {
     "eightfold": fetch_eightfold,
     "json_api": fetch_json_api,
     "html_links": fetch_html_links,
+    "adzuna": fetch_adzuna,
 }
 
 
@@ -339,6 +385,10 @@ def main():
 
     all_jobs, failures, empty_sources, agent_required = [], [], [], []
     for c in companies:
+        if c.get("enabled") is False:
+            if args.verify:
+                print(f"OFF       {c['name']}: disabled in config")
+            continue
         adapter = c.get("adapter", "agent")
         if adapter == "agent":
             agent_required.append({

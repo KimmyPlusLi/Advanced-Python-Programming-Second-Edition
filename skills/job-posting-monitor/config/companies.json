@@ -195,6 +195,20 @@
       "notes": "Morgan Stanley careers search is Eightfold-backed; host/domain are guesses — check the XHR host on the search page."
     },
     {
+      "name": "Adzuna (aggregator)",
+      "category": "aggregator",
+      "adapter": "adzuna",
+      "enabled": false,
+      "careers_url": "https://www.adzuna.com/",
+      "params": {
+        "country": "us",
+        "search_terms": ["portfolio manager hedge fund", "proprietary trader", "quantitative researcher", "sales trader"],
+        "max_pages": 2
+      },
+      "verified": false,
+      "notes": "Long-tail catcher for firms not on this list. Enable after setting ADZUNA_APP_ID / ADZUNA_APP_KEY env vars (free at developer.adzuna.com). Each result's company field is the actual employer."
+    },
+    {
       "name": "UBS",
       "category": "bank",
       "adapter": "html_links",
