@@ -37,6 +37,7 @@ python3 {skill_dir}/scripts/tracker.py <command> [args]
 | Unlocked milestones | `milestones` |
 | Archive evidence | `log ... --evidence FILE`, or `attach "<skill>" [--file F]... [--text "..."] [--title hint] [--date YYYY-MM-DD]` |
 | Browse evidence | `evidence [skill]` |
+| Save a practice method | `edit "<skill>" --add-method "..."` (`--remove-method "text"` to drop) |
 | Save motivation | `edit "<skill>" --add-motivation "..."` |
 | Recall motivation | `motivate [skill]` |
 | Long look-back | `review [--months N]` (default 6) |
@@ -157,12 +158,22 @@ weeks) suggest they treat themselves to a small real-world reward. Never
 invent a milestone the script didn't print, and never turn a celebration
 into pressure about the next one.
 
+**Methods** — A skill can carry saved **methods**: concrete practice
+recipes the user has collected (e.g. "daily 20-minute plan: 10 min market
+discussion, 5 min business English, 5 min casual" or "shadow a 10-20 min
+soundtrack and write every word down"). When the user shares a routine
+that worked for them, save it with `edit --add-method`. Methods appear in
+`skills` output — treat them as the user's preferred way to practice.
+
 **Suggesting** — When the user has a spare moment ("I have 10 minutes"),
 run `suggest` and turn the top pick into ONE concrete micro-task sized to
-their time and setting, using the skill's why/facet — e.g. for a language:
-"Shadow one paragraph of a news clip"; for people skills: "In your next
-meeting, watch how the most effective person opens a disagreement." Offer
-the runner-up only if they decline.
+their time and setting. If the skill has saved methods, prefer those —
+whole if time allows, or the piece that fits ("you've got 10 minutes:
+just the market-discussion part of your 20-minute plan"). Otherwise
+improvise from the skill's why/facet — e.g. for a language: "Shadow one
+paragraph of a news clip"; for people skills: "In your next meeting,
+watch how the most effective person opens a disagreement." Offer the
+runner-up only if they decline.
 
 **Daily check-in** — For "how's today going", run `today`. If nothing is
 logged, point at the suggestion; a 5-minute session counts. Small and daily

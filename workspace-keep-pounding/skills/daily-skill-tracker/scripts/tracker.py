@@ -298,6 +298,7 @@ def cmd_import(args):
                 "facets": item.get("facets", []),
                 "priority": item.get("priority", "normal"),
                 "freq": item.get("freq", 1),
+                "methods": item.get("methods", []),
                 "motivation": item.get("motivation", []),
                 "added": date.today().isoformat(),
             }
@@ -337,6 +338,8 @@ def cmd_skills(args):
             print(f"    why: {s['why']}")
         if s.get("facets"):
             print(f"    facets: {', '.join(s['facets'])}")
+        for m in s.get("methods", []):
+            print(f"    method: {m}")
 
 
 def cmd_log(args):
@@ -608,6 +611,15 @@ def cmd_edit(args):
         s.setdefault("motivation", []).extend(
             m for m in args.add_motivation if m not in s.get("motivation", [])
         )
+    if args.add_method:
+        s.setdefault("methods", []).extend(
+            m for m in args.add_method if m not in s.get("methods", [])
+        )
+    if args.remove_method:
+        s["methods"] = [
+            m for m in s.get("methods", [])
+            if not any(r.lower() in m.lower() for r in args.remove_method)
+        ]
     if args.remove_facet:
         s["facets"] = [f for f in s.get("facets", []) if f not in args.remove_facet]
     if args.rename:
@@ -1194,6 +1206,10 @@ def main(argv=None):
     sp.add_argument("--remove-facet", action="append")
     sp.add_argument("--add-motivation", action="append",
                     help="save a piece of advice/motivation for this skill")
+    sp.add_argument("--add-method", action="append",
+                    help="save a practice method/recipe for this skill")
+    sp.add_argument("--remove-method", action="append",
+                    help="remove methods containing this text")
     sp.add_argument("--rename", help="new name (rewrites logged history too)")
     sp.add_argument("--restore", action="store_true", help="un-archive the skill")
     sp.set_defaults(func=cmd_edit)
