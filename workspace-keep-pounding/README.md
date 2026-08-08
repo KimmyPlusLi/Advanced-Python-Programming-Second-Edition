@@ -71,6 +71,74 @@ Exact config keys drift between OpenClaw versions — treat the snippets as
 the shape, and `openclaw --help` / docs.openclaw.ai as the source of truth.
 Keep the bot token out of git and out of chats.
 
+## Hybrid models: local for the daily loop, frontier for coaching
+
+The tracker's data lives at `~/.openclaw/skill-tracker/` — outside any
+agent's workspace — so multiple agents (or models) share one ledger
+automatically. That enables a cost-efficient split:
+
+- **Local model (e.g. Qwen via Ollama):** daily logging, nudges, evidence
+  archiving — high-frequency, mechanical, zero marginal cost, private.
+- **Frontier model:** coaching, weekly/monthly reviews, milestone
+  celebrations — low-frequency, judgment-heavy, worth paying for.
+
+**Pattern A — one agent, switch models per task (simplest).** Default the
+agent to the local model; switch to the frontier model in-chat only when
+you want a review:
+
+```jsonc
+{
+  "models": {
+    "providers": {
+      "local": {
+        "baseUrl": "http://localhost:11434/v1",
+        "apiKey": "ollama",
+        "models": [{ "id": "qwen3.6" }]
+      }
+    }
+  },
+  "agents": {
+    "list": [
+      {
+        "id": "keep-pounding",
+        "workspace": "~/.openclaw/workspace-keep-pounding",
+        "model": "local/qwen3.6"
+      }
+    ]
+  }
+}
+```
+
+Then in chat: `/model <frontier-model>` before "how was my month?", and
+`/model local/qwen3.6` (or `/model reset`) after. One chat, one session,
+your choice per message.
+
+**Pattern B — two agents, fully automatic.** Add a second agent (e.g.
+`keep-pounding-coach`) on the frontier model, pointing at the **same
+workspace** so it carries the same persona and skill:
+
+```jsonc
+{
+  "agents": {
+    "list": [
+      { "id": "keep-pounding",       "workspace": "~/.openclaw/workspace-keep-pounding", "model": "local/qwen3.6" },
+      { "id": "keep-pounding-coach", "workspace": "~/.openclaw/workspace-keep-pounding", "model": "<frontier-model>" }
+    ]
+  }
+}
+```
+
+Bind your everyday Telegram bot to `keep-pounding`; reach the coach via a
+second bot (or a second binding). Both see the same ledger, milestones,
+and evidence — the coach picks up exactly where the logger left off.
+
+**Acceptance test for the local model** (tool-calling is the weak point of
+small models): log 3 sessions with notes → verify the notes appear
+*verbatim* in `~/.openclaw/skill-tracker/log.jsonl` → ask "what should I
+practice?" → trip a milestone. If entries are missing or paraphrased, the
+local model is emitting broken tool calls — use a larger quant or keep
+that flow on the hosted model.
+
 ## Daily use
 
 Dictate into the chat: "did 10 min of shadowing on the bus, felt smoother
