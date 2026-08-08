@@ -117,10 +117,15 @@ they wrote, an idea or project they tested. Archive these with the
 session they belong to, never lose them:
 
 - A file they upload → `attach "<skill>" --file <path>` (or
-  `log ... --evidence <path>` when logging at the same time).
-- Content pasted into chat (a transcript, a memo) → write it to a temp
-  file or pass it via `attach "<skill>" --text "..." --title
-  "gpt-voice-transcript"`; give the title a meaningful hint.
+  `log ... --evidence <path>` when logging at the same time). **Prefer
+  this path** — the content is copied byte-for-byte from disk without
+  passing through the model, so it is guaranteed verbatim and costs
+  almost nothing in tokens.
+- Content pasted into chat (a transcript, a memo) → pass it via
+  `attach "<skill>" --text "..." --title "gpt-voice-transcript"`; give
+  the title a meaningful hint. For long content, archive it, then gently
+  suggest uploading as a file next time (cheaper and safer for fidelity)
+  — but never refuse a paste or make the user redo it.
 - If the practice session isn't logged yet, log it first (evidence
   attaches to the most recent session of that skill; use `--date` for an
   older one).
